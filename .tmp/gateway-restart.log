@@ -1,0 +1,827 @@
+
+> openclaw@2026.2.10 openclaw D:\openclaw
+> node scripts/run-node.mjs "gateway" "run" "--bind" "loopback" "--port" "18789" "--force"
+
+[plugins] feishu_doc: Registered feishu_doc, feishu_app_scopes
+[plugins] feishu_wiki: Registered feishu_wiki tool
+[plugins] feishu_drive: Registered feishu_drive tool
+2026-02-13T10:01:11.229Z [canvas] host mounted at http://127.0.0.1:18789/__openclaw__/canvas/ (root C:\Users\Administrator\.openclaw\canvas)
+2026-02-13T10:01:11.292Z [heartbeat] started
+2026-02-13T10:01:11.299Z [gateway] agent model: nvidia/z-ai/glm4.7
+2026-02-13T10:01:11.301Z [gateway] listening on ws://127.0.0.1:18789 (PID 12044)
+2026-02-13T10:01:11.303Z [gateway] listening on ws://[::1]:18789
+2026-02-13T10:01:11.306Z [gateway] log file: \tmp\openclaw\openclaw-2026-02-13.log
+2026-02-13T10:01:11.321Z [info]: [ 'client ready' ]
+2026-02-13T10:01:11.378Z [browser/service] Browser control service ready (profiles=2)
+2026-02-13T10:01:11.399Z [feishu] starting feishu[main] (mode: websocket)
+2026-02-13T10:01:11.721Z [feishu] feishu[main]: bot open_id resolved: ou_348d074cf728acb23936d411cfae142a
+2026-02-13T10:01:11.724Z [info]: [ 'event-dispatch is ready' ]
+2026-02-13T10:01:11.728Z [feishu] feishu[main]: starting WebSocket connection...
+2026-02-13T10:01:11.732Z [info]: [
+  '[ws]',
+  'receive events or callbacks through persistent connection only available in self-build & Feishu app, Configured in:\n' +
+    '        Developer Console(开发者后台) \n' +
+    '          ->\n' +
+    '        Events and Callbacks(事件与回调)\n' +
+    '          -> \n' +
+    '        Mode of event/callback subscription(订阅方式)\n' +
+    '          -> \n' +
+    '        Receive events/callbacks through persistent connection(使用 长连接 接收事件/回调)'
+]
+2026-02-13T10:01:11.736Z [feishu] feishu[main]: WebSocket client started
+2026-02-13T10:01:11.925Z [info]: [ '[ws]', 'ws client ready' ]
+2026-02-13T10:01:13.382Z [ws] webchat connected conn=4db9a8a1-7f61-498a-b7e8-0f0ab6d2866f remote=127.0.0.1 client=openclaw-control-ui webchat vdev
+2026-02-13T10:01:13.455Z [ws] ⇄ res ✓ chat.history 59ms conn=4db9a8a1…866f id=2d58b714…322b
+2026-02-13T10:01:39.825Z [ws] webchat disconnected code=1001 reason=n/a conn=4db9a8a1-7f61-498a-b7e8-0f0ab6d2866f
+2026-02-13T10:01:40.256Z [ws] webchat connected conn=339634c9-d603-4867-b07d-633636d51e6c remote=127.0.0.1 client=openclaw-control-ui webchat vdev
+2026-02-13T10:03:26.580Z [feishu] feishu[main]: received message from ou_096aaf554bba1539b30ea3f3b1fa2921 in oc_5cd4edd79007eb8b7c450bffa1c6f474 (p2p)
+2026-02-13T10:03:26.591Z [feishu] feishu[main]: dispatching to agent (session=agent:main:main)
+2026-02-13T10:03:26.956Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T10:03:30.126Z [feishu] feishu[main] deliver called: text=The input (214283 tokens) is longer than the model's context length (202752 tokens).
+2026-02-13T10:03:30.136Z [feishu] feishu[main] deliver: sending 1 text chunks to oc_5cd4edd79007eb8b7c450bffa1c6f474
+2026-02-13T10:03:30.676Z [feishu] feishu[main]: dispatch complete (queuedFinal=true, replies=1)
+2026-02-13T10:03:30.975Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T10:03:31.052Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T10:03:45.288Z [feishu] skipping duplicate message om_x100b57db2014e0a4b31117a8900c025
+2026-02-13T10:03:47.131Z [ws] webchat disconnected code=1001 reason=n/a conn=339634c9-d603-4867-b07d-633636d51e6c
+2026-02-13T10:03:47.555Z [ws] webchat connected conn=216a75dd-9898-4dd7-a550-4a73467314b2 remote=127.0.0.1 client=openclaw-control-ui webchat vdev
+2026-02-13T10:05:03.555Z [feishu] feishu[main]: received message from ou_096aaf554bba1539b30ea3f3b1fa2921 in oc_5cd4edd79007eb8b7c450bffa1c6f474 (p2p)
+2026-02-13T10:05:03.558Z [feishu] feishu[main]: dispatching to agent (session=agent:main:main)
+2026-02-13T10:05:03.920Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T10:05:06.618Z [feishu] feishu[main] deliver called: text=The input (214455 tokens) is longer than the model's context length (202752 tokens).
+2026-02-13T10:05:06.622Z [feishu] feishu[main] deliver: sending 1 text chunks to oc_5cd4edd79007eb8b7c450bffa1c6f474
+2026-02-13T10:05:07.135Z [feishu] feishu[main]: dispatch complete (queuedFinal=true, replies=1)
+2026-02-13T10:05:07.470Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T10:05:07.622Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T10:05:22.494Z [feishu] skipping duplicate message om_x100b57db3a2474a0b3411ef7cb58c8d
+2026-02-13T10:11:38.166Z [feishu] feishu[main]: received message from ou_096aaf554bba1539b30ea3f3b1fa2921 in oc_5cd4edd79007eb8b7c450bffa1c6f474 (p2p)
+2026-02-13T10:11:38.174Z [feishu] feishu[main]: dispatching to agent (session=agent:main:main)
+2026-02-13T10:11:39.149Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T10:11:45.500Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T10:11:51.536Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T10:11:57.122Z [feishu] skipping duplicate message om_x100b57dbc358a8b4b4a70600e6cf9a1
+2026-02-13T10:11:57.596Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T10:12:03.076Z [feishu] feishu[main]: received message from ou_096aaf554bba1539b30ea3f3b1fa2921 in oc_5cd4edd79007eb8b7c450bffa1c6f474 (p2p)
+2026-02-13T10:12:03.081Z [feishu] feishu[main]: dispatching to agent (session=agent:main:main)
+2026-02-13T10:12:03.110Z [feishu] feishu[main]: dispatch complete (queuedFinal=false, replies=0)
+2026-02-13T10:12:03.467Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T10:12:09.479Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T10:12:15.464Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T10:12:20.417Z [feishu] feishu[main] deliver called: text=你好飞哥，我是 moss 😎
+
+很高兴继续为你服务，今天有什么我能帮你做的吗？
+2026-02-13T10:12:20.419Z [feishu] feishu[main] deliver: sending 1 text chunks to oc_5cd4edd79007eb8b7c450bffa1c6f474
+2026-02-13T10:12:20.932Z [feishu] feishu[main]: dispatch complete (queuedFinal=true, replies=1)
+2026-02-13T10:12:21.250Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T10:12:21.307Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T10:12:32.695Z [memory] sync failed (session-start): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"1c29b2fb-d853-923a-b3b9-53cd881f101a"}
+2026-02-13T10:12:32.697Z [memory] sync failed (search): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"1c29b2fb-d853-923a-b3b9-53cd881f101a"}
+2026-02-13T10:12:36.349Z [tools] exec failed: Get-ChildItem : �Ҳ�����������ơ�la��ƥ��Ĳ�����
+����λ�� ��:1 �ַ�: 4
++ ls -la D:\openclaw\extensions\feishu
++    ~~~
+    + CategoryInfo          : InvalidArgument: (:) [Get-ChildItem]��ParameterBindingException
+    + FullyQualifiedErrorId : NamedParameterNotFound,Microsoft.PowerShell.Commands.GetChildItemCommand
+
+Command exited with code 1
+2026-02-13T10:41:54.979Z [ws] webchat disconnected code=1001 reason=n/a conn=216a75dd-9898-4dd7-a550-4a73467314b2
+2026-02-13T10:41:55.411Z [ws] webchat connected conn=4cfd21de-b422-496d-b927-6ec25e16b92b remote=127.0.0.1 client=openclaw-control-ui webchat vdev
+2026-02-13T10:57:29.615Z [ws] ⇄ res ✓ usage.cost 117ms conn=4cfd21de…b92b id=70ee11bd…906c
+2026-02-13T10:57:29.627Z [ws] ⇄ res ✓ sessions.usage 145ms conn=4cfd21de…b92b id=03d5b4e4…f5c2
+2026-02-13T10:58:03.665Z [feishu] feishu[main]: received message from ou_096aaf554bba1539b30ea3f3b1fa2921 in oc_5cd4edd79007eb8b7c450bffa1c6f474 (p2p)
+2026-02-13T10:58:03.667Z [feishu] feishu[main]: dispatching to agent (session=agent:main:main)
+2026-02-13T10:58:04.009Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T10:58:10.364Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T10:58:13.850Z [feishu] feishu[main] deliver called: text=今天的 TOKEN 使用情况如下：
+
+**📊 Token 使用统计**
+- **输入 Token:** 55,000
+- **输出 Token:** 500
+- **上下文使用:** 55,000 
+2026-02-13T10:58:13.854Z [feishu] feishu[main] deliver: sending 1 text chunks to oc_5cd4edd79007eb8b7c450bffa1c6f474
+2026-02-13T10:58:14.356Z [feishu] feishu[main]: dispatch complete (queuedFinal=true, replies=1)
+2026-02-13T10:58:14.649Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T10:58:14.705Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T10:58:22.137Z [feishu] skipping duplicate message om_x100b57c4756ad8acb325d845f4f78f3
+2026-02-13T10:58:48.678Z [feishu] feishu[main]: received message from ou_096aaf554bba1539b30ea3f3b1fa2921 in oc_5cd4edd79007eb8b7c450bffa1c6f474 (p2p)
+2026-02-13T10:58:48.680Z [feishu] feishu[main]: dispatching to agent (session=agent:main:main)
+2026-02-13T10:58:48.990Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T10:58:55.328Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T10:59:01.315Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T10:59:07.330Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T10:59:07.387Z [feishu] skipping duplicate message om_x100b57c470b6fcacb39de731d589c2d
+2026-02-13T10:59:09.466Z [tools] browser failed: Can't reach the OpenClaw browser control service. Start (or restart) the OpenClaw gateway (OpenClaw.app menubar, or `openclaw gateway`) and try again. (Error: Error: Chrome extension relay is running, but no tab is connected. Click the OpenClaw Chrome extension icon on a tab to attach it (profile "chrome").)
+2026-02-13T10:59:11.609Z [tools] exec failed: openclaw : �޷�����openclaw����ʶ��Ϊ cmdlet���������ű��ļ�������г�������ơ��������Ƶ�ƴд���������·������ȷ��·����
+ȷ��Ȼ������һ�Ρ�
+����λ�� ��:1 �ַ�: 1
++ openclaw gateway status
++ ~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (openclaw:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+Command exited with code 1
+2026-02-13T10:59:13.299Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T10:59:13.735Z [tools] exec failed: Command exited with code 1
+2026-02-13T10:59:19.345Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T10:59:25.352Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T10:59:25.366Z [feishu] feishu[main] deliver called: text=我需要先启动浏览器服务来访问控制台。让我启动一下：
+2026-02-13T10:59:25.368Z [feishu] feishu[main] deliver: sending 1 text chunks to oc_5cd4edd79007eb8b7c450bffa1c6f474
+2026-02-13T10:59:25.818Z [feishu] feishu[main] deliver called: text=抱歉，浏览器控制服务暂时无法访问。你说的应该是对的，NVIDIA API 控制台应该有用量统计菜单。
+
+能否劳烦你告诉我：
+
+1. **控制台的网址是什么？**（比如 build.nvidia.com
+2026-02-13T10:59:25.827Z [feishu] feishu[main] deliver: sending 1 text chunks to oc_5cd4edd79007eb8b7c450bffa1c6f474
+2026-02-13T10:59:26.359Z [feishu] feishu[main]: dispatch complete (queuedFinal=true, replies=2)
+2026-02-13T10:59:26.638Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T10:59:26.738Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T10:59:52.325Z [tools] browser failed: Can't reach the OpenClaw browser control service. Start (or restart) the OpenClaw gateway (OpenClaw.app menubar, or `openclaw gateway`) and try again. (Error: Error: Chrome extension relay is running, but no tab is connected. Click the OpenClaw Chrome extension icon on a tab to attach it (profile "chrome").)
+2026-02-13T10:59:53.927Z [tools] web_fetch failed: Blocked: private/internal IP address
+2026-02-13T11:09:52.852Z [ws] webchat disconnected code=1001 reason=n/a conn=4cfd21de-b422-496d-b927-6ec25e16b92b
+2026-02-13T11:09:53.339Z [ws] webchat connected conn=c79bd23a-39fd-4101-83a4-31f9bbc34cdf remote=127.0.0.1 client=openclaw-control-ui webchat vdev
+2026-02-13T11:10:16.342Z [ws] webchat disconnected code=1001 reason=n/a conn=c79bd23a-39fd-4101-83a4-31f9bbc34cdf
+2026-02-13T11:10:16.487Z [ws] webchat connected conn=93bc8852-4a2c-4c90-acd8-406e7179b0ec remote=127.0.0.1 client=openclaw-control-ui webchat vdev
+2026-02-13T11:10:24.108Z [ws] ⇄ res ✓ cron.run 47073ms conn=4cfd21de…b92b id=7fe5a0f2…b5cc
+2026-02-13T11:10:24.109Z [ws] ⇄ res ✓ cron.status 46940ms conn=4cfd21de…b92b id=a2a80957…61f6
+2026-02-13T11:10:24.110Z [ws] ⇄ res ✓ cron.list 46941ms conn=4cfd21de…b92b id=45ea1a11…3c51
+2026-02-13T11:10:24.112Z [ws] ⇄ res ✓ cron.status 30732ms conn=c79bd23a…4cdf id=b5c3a0b2…a092
+2026-02-13T11:10:24.113Z [ws] ⇄ res ✓ cron.list 30734ms conn=c79bd23a…4cdf id=26c16003…3ee8
+2026-02-13T11:10:24.114Z [ws] ⇄ res ✓ cron.status 28770ms conn=c79bd23a…4cdf id=508cf43a…7909
+2026-02-13T11:10:24.115Z [ws] ⇄ res ✓ cron.status 22641ms conn=c79bd23a…4cdf id=dc64c8ed…9239
+2026-02-13T11:10:24.116Z [ws] ⇄ res ✓ cron.status 21777ms conn=c79bd23a…4cdf id=1885e5b4…65ff
+2026-02-13T11:10:24.117Z [ws] ⇄ res ✓ cron.status 16279ms conn=c79bd23a…4cdf id=464d27d1…9e33
+2026-02-13T11:10:24.123Z [ws] ⇄ res ✓ cron.status 7616ms conn=93bc8852…b0ec id=a8e04e85…0384
+2026-02-13T11:10:24.125Z [ws] ⇄ res ✓ cron.list 7617ms conn=93bc8852…b0ec id=8c1705e8…3bc7
+2026-02-13T11:11:37.361Z [feishu] feishu[main]: received message from ou_096aaf554bba1539b30ea3f3b1fa2921 in oc_5cd4edd79007eb8b7c450bffa1c6f474 (p2p)
+2026-02-13T11:11:37.363Z [feishu] feishu[main]: dispatching to agent (session=agent:main:main)
+2026-02-13T11:11:37.685Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:11:44.055Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:11:50.022Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:11:56.054Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:11:56.341Z [feishu] skipping duplicate message om_x100b57c4204bb8a0b3b3ff769a711e1
+2026-02-13T11:12:02.052Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:12:08.057Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:12:14.011Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:12:20.090Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:12:26.083Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:12:32.111Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:12:38.087Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:12:38.415Z [feishu] feishu[main] deliver called: text=好的，我明白了！让我查找历史记录中所有未完成的工作事项，然后通过飞书发送给你。
+2026-02-13T11:12:38.417Z [feishu] feishu[main] deliver: sending 1 text chunks to oc_5cd4edd79007eb8b7c450bffa1c6f474
+2026-02-13T11:12:38.852Z [feishu] feishu[main] deliver called: text=好的，我整理了历史记录中所有未完成的工作事项 📋
+
+**📌 历史未完成工作统计：**
+
+- **活动需求开发** 
+  - 记录时间：2025-02-13 → 2026-02-13
+  - 状态：
+2026-02-13T11:12:38.860Z [feishu] feishu[main] deliver: sending 1 text chunks to oc_5cd4edd79007eb8b7c450bffa1c6f474
+2026-02-13T11:12:39.372Z [feishu] feishu[main]: dispatch complete (queuedFinal=true, replies=2)
+2026-02-13T11:12:39.665Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T11:12:39.680Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T11:13:56.162Z [feishu] feishu[main]: received message from ou_096aaf554bba1539b30ea3f3b1fa2921 in oc_5cd4edd79007eb8b7c450bffa1c6f474 (p2p)
+2026-02-13T11:13:56.164Z [feishu] feishu[main]: dispatching to agent (session=agent:main:main)
+2026-02-13T11:13:56.500Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:14:02.819Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:14:08.856Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:14:14.771Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:14:16.136Z [feishu] skipping duplicate message om_x100b57c439ffa0a0b2ce9c860c28794
+2026-02-13T11:14:19.820Z [feishu] feishu[main] deliver called: text=明白了！抱歉我理解错了。让我重新整理并通过飞书发送给你。
+2026-02-13T11:14:19.821Z [feishu] feishu[main] deliver: sending 1 text chunks to oc_5cd4edd79007eb8b7c450bffa1c6f474
+2026-02-13T11:14:20.246Z [feishu] feishu[main]: dispatch complete (queuedFinal=true, replies=1)
+2026-02-13T11:14:20.556Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T11:14:20.594Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T11:14:46.751Z [feishu] feishu[main]: received message from ou_096aaf554bba1539b30ea3f3b1fa2921 in oc_5cd4edd79007eb8b7c450bffa1c6f474 (p2p)
+2026-02-13T11:14:46.753Z [feishu] feishu[main]: dispatching to agent (session=agent:main:main)
+2026-02-13T11:14:47.106Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:14:53.426Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:14:58.796Z [feishu] feishu[main] deliver called: text=好的，我来帮你创建这个定时任务。
+2026-02-13T11:14:58.798Z [feishu] feishu[main] deliver: sending 1 text chunks to oc_5cd4edd79007eb8b7c450bffa1c6f474
+2026-02-13T11:14:59.244Z [feishu] feishu[main] deliver called: text=✅ 定时任务创建成功！
+
+**📅 任务详情：**
+- **名称：** 每日未完成任务提醒
+- **执行时间：** 每天早上 9:30 (GMT+8)
+- **下次运行：** 2026年2月14日 0
+2026-02-13T11:14:59.253Z [feishu] feishu[main] deliver: sending 1 text chunks to oc_5cd4edd79007eb8b7c450bffa1c6f474
+2026-02-13T11:14:59.794Z [feishu] feishu[main]: dispatch complete (queuedFinal=true, replies=2)
+2026-02-13T11:15:00.057Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T11:15:00.768Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T11:15:00.770Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:15:05.254Z [feishu] skipping duplicate message om_x100b57c43491dca8b29b8886c0e84bb
+2026-02-13T11:17:09.520Z [feishu] feishu[main]: received message from ou_096aaf554bba1539b30ea3f3b1fa2921 in oc_5cd4edd79007eb8b7c450bffa1c6f474 (p2p)
+2026-02-13T11:17:09.523Z [feishu] feishu[main]: dispatching to agent (session=agent:main:main)
+2026-02-13T11:17:09.854Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:17:16.092Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:17:18.117Z [tools] read failed: ENOENT: no such file or directory, access 'C:\Users\Administrator\.openclaw\workspace\MEMORY.md'
+2026-02-13T11:17:22.135Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:17:26.816Z [ws] ⇄ res ✓ cron.run 13822ms conn=42341453…677b id=641e4fce…ced5
+2026-02-13T11:17:28.165Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:17:29.058Z [feishu] skipping duplicate message om_x100b57c4cd84cd38b3747c458fbc897
+2026-02-13T11:17:34.198Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:17:40.739Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:17:46.172Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:17:52.215Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:17:58.218Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:17:58.308Z [diagnostic] lane wait exceeded: lane=session:agent:main:main waitedMs=30439 queueAhead=0
+2026-02-13T11:17:58.349Z [feishu] feishu[main] deliver called: text=好的，让我立即测试运行这个任务。
+2026-02-13T11:17:58.351Z [feishu] feishu[main] deliver: sending 1 text chunks to oc_5cd4edd79007eb8b7c450bffa1c6f474
+2026-02-13T11:17:58.790Z [feishu] feishu[main] deliver called: text=✅ 任务已启动！
+
+测试任务正在后台隔离会话中运行，稍后会通过飞书向你发送未完成任务汇总清单。请留意飞书消息 😎
+
+（正式的定时任务会从明天早上9:30开始每天执行）
+2026-02-13T11:17:58.797Z [feishu] feishu[main] deliver: sending 1 text chunks to oc_5cd4edd79007eb8b7c450bffa1c6f474
+2026-02-13T11:17:59.241Z [feishu] feishu[main]: dispatch complete (queuedFinal=true, replies=2)
+2026-02-13T11:17:59.518Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T11:17:59.586Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T11:18:03.117Z ✅ 测试执行完成！
+
+已经扫描了所有历史记录，找到 1 个未完成任务（活动需求开发），并通过飞书发送给你了（飞书消息ID：`om_x100b57c4cae9bca4b2e9889d3f2fc9a`）。请检查你的飞书消息，看看格式是否符合你的预期 😎
+2026-02-13T11:32:22.914Z [feishu] feishu[main]: received message from ou_096aaf554bba1539b30ea3f3b1fa2921 in oc_5cd4edd79007eb8b7c450bffa1c6f474 (p2p)
+2026-02-13T11:32:22.916Z [feishu] feishu[main]: dispatching to agent (session=agent:main:main)
+2026-02-13T11:32:23.282Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:32:29.664Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:32:35.636Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:32:41.432Z [feishu] skipping duplicate message om_x100b57c4f29398a4b4a6fd860d710cc
+2026-02-13T11:32:41.642Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:32:44.872Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"0eeb2c19-273b-944b-bb97-f93c67311b47"}
+2026-02-13T11:32:47.621Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:32:53.613Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:32:56.586Z [feishu] feishu[main] deliver called: text=✅ 已记录！
+
+**📌 新增未完成任务：**
+- **职工书屋APP审核的预览图有问题** - 待处理
+
+已添加到今天的工作记录中（memory/2026-02-13.md）。明天早上9:30的定时
+2026-02-13T11:32:56.589Z [feishu] feishu[main] deliver: sending 1 text chunks to oc_5cd4edd79007eb8b7c450bffa1c6f474
+2026-02-13T11:32:57.112Z [feishu] feishu[main]: dispatch complete (queuedFinal=true, replies=1)
+2026-02-13T11:32:57.431Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T11:32:57.476Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T11:34:01.689Z [feishu] feishu[main]: received message from ou_096aaf554bba1539b30ea3f3b1fa2921 in oc_5cd4edd79007eb8b7c450bffa1c6f474 (p2p)
+2026-02-13T11:34:01.691Z [feishu] feishu[main]: dispatching to agent (session=agent:main:main)
+2026-02-13T11:34:02.040Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:34:08.397Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:34:10.567Z [feishu] feishu[main] deliver called: text=我理解你的需求，这是一个自动化邮件转发任务。这个任务我可以帮你实现，但需要确认几个信息：
+
+**📋 需要的信息：**
+
+1. **腾讯企业邮箱网址** - 是 `exmail.qq.com` 吗？
+
+2026-02-13T11:34:10.569Z [feishu] feishu[main] deliver: sending 1 text chunks to oc_5cd4edd79007eb8b7c450bffa1c6f474
+2026-02-13T11:34:11.105Z [feishu] feishu[main]: dispatch complete (queuedFinal=true, replies=1)
+2026-02-13T11:34:11.392Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T11:34:11.480Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T11:34:20.176Z [feishu] skipping duplicate message om_x100b57c48c46a0a0b4a6baec6513ce5
+2026-02-13T11:36:31.740Z [feishu] feishu[main]: received message from ou_096aaf554bba1539b30ea3f3b1fa2921 in oc_5cd4edd79007eb8b7c450bffa1c6f474 (p2p)
+2026-02-13T11:36:31.742Z [feishu] feishu[main]: dispatching to agent (session=agent:main:main)
+2026-02-13T11:36:32.087Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:36:38.444Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T11:36:42.707Z [feishu] feishu[main] deliver called: text=是的，有更好的方式！腾讯企业邮箱和企业微信都提供了API接口，可以通过API来读取邮件和转发，无需扫码登录。
+
+**🔧 可用的方案：**
+
+**方案一：腾讯企业邮箱API**
+- 提供 IMAP 协
+2026-02-13T11:36:42.709Z [feishu] feishu[main] deliver: sending 1 text chunks to oc_5cd4edd79007eb8b7c450bffa1c6f474
+2026-02-13T11:36:43.158Z [feishu] feishu[main]: dispatch complete (queuedFinal=true, replies=1)
+2026-02-13T11:36:43.455Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T11:36:43.497Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T11:36:51.022Z [feishu] skipping duplicate message om_x100b57c485213ca0b29d82686d749b2
+2026-02-13T12:14:43.347Z [info]: [ '[ws]', 'reconnect' ]
+2026-02-13T13:29:12.735Z [ws] webchat disconnected code=1001 reason=n/a conn=93bc8852-4a2c-4c90-acd8-406e7179b0ec
+2026-02-13T13:29:13.156Z [ws] webchat connected conn=3f142b7e-8a50-4c3d-a681-ae34c0c5349c remote=127.0.0.1 client=openclaw-control-ui webchat vdev
+2026-02-13T13:40:58.430Z [agent/embedded] Removed orphaned user message to prevent consecutive user turns. runId=de13b6a2-16f7-418f-9a3e-1e85c675d095 sessionId=62e0db52-9d54-46ab-a57a-b6b684c2a265
+2026-02-13T13:41:23.860Z [memory] embeddings rate limited; retrying in 559ms
+2026-02-13T13:41:24.460Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"9a5abc54-7bba-9c92-8cac-8402a91426b8"}
+2026-02-13T13:41:27.254Z [tools] exec failed: node:internal/modules/cjs/loader:1424
+  throw err;
+  ^
+
+Error: Cannot find module 'node-fetch'
+Require stack:
+- C:\Users\Administrator\.openclaw\workspace\memory\qyweixin-mail-forwarder.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1421:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+    at Module._load (node:internal/modules/cjs/loader:1227:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.require (node:internal/modules/cjs/loader:1504:12)
+    at require (node:internal/modules/helpers:152:16)
+    at Object.<anonymous> (C:\Users\Administrator\.openclaw\workspace\memory\qyweixin-mail-forwarder.js:6:15)
+    at Module._compile (node:internal/modules/cjs/loader:1761:14) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\Administrator\\.openclaw\\workspace\\memory\\qyweixin-mail-forwarder.js'
+  ]
+}
+
+Node.js v24.11.1
+
+Command exited with code 1
+2026-02-13T13:41:30.829Z [tools] exec failed: npm : �޷������ļ� C:\Program Files\nodejs\npm.ps1����Ϊ�ڴ�ϵͳ�Ͻ�ֹ���нű����й���ϸ��Ϣ������� https:/go.microsoft
+.com/fwlink/?LinkID=135170 �е� about_Execution_Policies��
+����λ�� ��:1 �ַ�: 1
++ npm install node-fetch
++ ~~~
+    + CategoryInfo          : SecurityError: (:) []��PSSecurityException
+    + FullyQualifiedErrorId : UnauthorizedAccess
+
+Command exited with code 1
+2026-02-13T13:41:49.735Z [memory] embeddings rate limited; retrying in 516ms
+2026-02-13T13:41:50.307Z [memory] embeddings rate limited; retrying in 1055ms
+2026-02-13T13:41:51.403Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"fdd3b282-f442-9cb1-8df2-03a9678cb059"}
+2026-02-13T13:42:07.522Z [memory] embeddings rate limited; retrying in 525ms
+2026-02-13T13:42:08.086Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"c9be0688-8004-9846-b3c4-fd59afa3c1dc"}
+2026-02-13T13:45:15.147Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"421952fa-d304-9290-82f5-e8bb90b756a8"}
+2026-02-13T13:46:59.972Z [tools] exec failed: ����λ�� ��:1 �ַ�: 11
++ cd memory && npm init -y
++           ~~
+��ǡ�&&�����Ǵ˰汾�е���Ч���ָ�����
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : InvalidEndOfLine
+
+Command exited with code 1
+2026-02-13T13:47:06.208Z [tools] exec failed: npm : �޷������ļ� C:\Program Files\nodejs\npm.ps1����Ϊ�ڴ�ϵͳ�Ͻ�ֹ���нű����й���ϸ��Ϣ������� https:/go.microsoft
+.com/fwlink/?LinkID=135170 �е� about_Execution_Policies��
+����λ�� ��:1 �ַ�: 1
++ npm init -y
++ ~~~
+    + CategoryInfo          : SecurityError: (:) []��PSSecurityException
+    + FullyQualifiedErrorId : UnauthorizedAccess
+
+Command exited with code 1
+2026-02-13T13:48:22.629Z [memory] embeddings rate limited; retrying in 512ms
+2026-02-13T13:48:23.210Z [memory] embeddings rate limited; retrying in 1109ms
+2026-02-13T13:48:24.363Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"3793ecf7-e029-93a9-91f8-735d01126032"}
+2026-02-13T13:53:52.187Z [memory] embeddings rate limited; retrying in 599ms
+2026-02-13T13:53:52.828Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"e431a6e6-8b90-9055-91af-e9dbe9015df6"}
+2026-02-13T13:54:29.018Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"9f88d74e-f913-9004-a2ad-8701491fb953"}
+2026-02-13T13:55:51.843Z [memory] embeddings rate limited; retrying in 581ms
+2026-02-13T13:55:52.456Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"2c2a791a-d7f5-901e-989b-828be3d9defe"}
+2026-02-13T13:56:59.254Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"b2956b06-7f96-9220-b8e6-0c9d3983ca94"}
+2026-02-13T13:59:14.431Z [memory] embeddings rate limited; retrying in 550ms
+2026-02-13T13:59:14.439Z [memory] embeddings rate limited; retrying in 587ms
+2026-02-13T13:59:15.027Z [memory] embeddings rate limited; retrying in 1049ms
+2026-02-13T13:59:16.122Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"f2464c9a-e15d-960d-b2bc-da405e1a0365"}
+2026-02-13T14:00:04.590Z [memory] embeddings rate limited; retrying in 583ms
+2026-02-13T14:00:04.595Z [memory] embeddings rate limited; retrying in 575ms
+2026-02-13T14:00:04.598Z [memory] embeddings rate limited; retrying in 528ms
+2026-02-13T14:00:05.213Z [memory] embeddings rate limited; retrying in 1106ms
+2026-02-13T14:00:06.369Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"96062607-88a6-9fba-8361-df2ebb8831c9"}
+2026-02-13T14:00:13.780Z [tools] exec failed: node:internal/modules/cjs/loader:1424
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\Administrator\.openclaw\workspace\memory\memory\auto-mail-forwarder.js'
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1421:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+    at Module._load (node:internal/modules/cjs/loader:1227:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v24.11.1
+
+Command exited with code 1
+2026-02-13T14:03:36.066Z [memory] embeddings rate limited; retrying in 503ms
+2026-02-13T14:03:36.071Z [memory] embeddings rate limited; retrying in 556ms
+2026-02-13T14:03:36.678Z [memory] embeddings rate limited; retrying in 1197ms
+2026-02-13T14:03:37.930Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"892dfcce-3210-9445-a27c-e284d93caf72"}
+2026-02-13T14:03:56.619Z [memory] embeddings rate limited; retrying in 599ms
+2026-02-13T14:03:57.266Z [memory] embeddings rate limited; retrying in 1030ms
+2026-02-13T14:03:58.344Z [memory] embeddings rate limited; retrying in 2389ms
+2026-02-13T14:04:00.777Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"7a409da6-b2c0-90ec-990f-e2498be19b13"}
+2026-02-13T14:04:09.177Z [tools] edit failed: Could not find the exact text in memory/auto-mail-forwarder.js. The old text must match exactly including all whitespace and newlines.
+2026-02-13T14:04:27.339Z [memory] embeddings rate limited; retrying in 524ms
+2026-02-13T14:04:27.902Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"68ce5f4c-fb54-9072-9780-faf19b48c32e"}
+2026-02-13T14:04:38.613Z [memory] embeddings rate limited; retrying in 506ms
+2026-02-13T14:04:39.168Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"8ef71162-16d9-9610-a4dc-65fa657a8dca"}
+2026-02-13T14:05:01.277Z [memory] embeddings rate limited; retrying in 505ms
+2026-02-13T14:05:01.279Z [memory] embeddings rate limited; retrying in 520ms
+2026-02-13T14:05:01.834Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"f4043b8d-e900-9f2d-bedd-183c36846dcf"}
+2026-02-13T14:08:11.800Z [memory] embeddings rate limited; retrying in 592ms
+2026-02-13T14:08:12.439Z [memory] embeddings rate limited; retrying in 1143ms
+2026-02-13T14:08:13.623Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"1e3e49ab-6962-9bd5-808c-d893be0eb0b5"}
+2026-02-13T14:08:25.519Z [memory] embeddings rate limited; retrying in 501ms
+2026-02-13T14:08:26.068Z [memory] embeddings rate limited; retrying in 1059ms
+2026-02-13T14:08:27.174Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"7038fbbe-1759-9c90-9ec2-b8cc0eb4ca3b"}
+2026-02-13T14:08:40.357Z [ws] ⇄ res ✓ config.schema 68ms conn=3f142b7e…349c id=729dc467…3265
+2026-02-13T14:08:45.005Z [memory] embeddings rate limited; retrying in 575ms
+2026-02-13T14:08:45.008Z [memory] embeddings rate limited; retrying in 533ms
+2026-02-13T14:08:46.113Z [memory] embeddings rate limited; retrying in 1031ms
+2026-02-13T14:08:47.189Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"a4c0620e-681e-9f1e-a89c-ac42b71404c1"}
+2026-02-13T14:09:38.566Z [memory] embeddings rate limited; retrying in 577ms
+2026-02-13T14:09:39.185Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"4f2104c3-dcd0-9197-af9c-1801ebe876b2"}
+2026-02-13T14:12:51.425Z [agent/embedded] read tool called without path: toolCallId=call_86f35e4fb271412dbec1b98a argsType=object
+2026-02-13T14:12:51.431Z [tools] read failed: Missing required parameter: path (path or file_path)
+2026-02-13T14:15:17.839Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"53c6b751-dc74-9a31-b8b2-97c47891277b"}
+2026-02-13T14:15:39.844Z [tools] edit failed: Could not find the exact text in memory/auto-mail-forwarder.js. The old text must match exactly including all whitespace and newlines.
+2026-02-13T14:16:06.554Z [memory] embeddings rate limited; retrying in 522ms
+2026-02-13T14:16:06.559Z [memory] embeddings rate limited; retrying in 505ms
+2026-02-13T14:16:07.117Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"bae53c30-d487-97d1-ae64-39279166c064"}
+2026-02-13T14:16:15.889Z [memory] embeddings rate limited; retrying in 563ms
+2026-02-13T14:16:15.903Z [memory] embeddings rate limited; retrying in 513ms
+2026-02-13T14:16:15.906Z [memory] embeddings rate limited; retrying in 524ms
+2026-02-13T14:16:16.488Z [memory] embeddings rate limited; retrying in 1163ms
+2026-02-13T14:16:17.711Z [memory] embeddings rate limited; retrying in 2284ms
+2026-02-13T14:16:20.040Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"9c89a784-bef8-9fd0-9f6d-92948bce83f8"}
+2026-02-13T14:26:08.731Z [tools] exec failed: ����λ�� ��:70 �ַ�: 64
++     const escapedUser = CONFIG.username.replace(/\"/g, '\\\\\"');
++                                                                ~
+����ʽ������а�������ı�ǡ�)����
+����λ�� ��:115 �ַ�: 27
++   imap.sendCommand('LOGOUT');
++                           ~~~
+�ַ���ȱ����ֹ��: '��
+����λ�� ��:119 �ַ�: 2
++ "
++  ~
+����ʽ��ȱ���ҡ�)����
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : UnexpectedToken
+
+Command exited with code 1
+2026-02-13T14:26:30.305Z [memory] embeddings rate limited; retrying in 587ms
+2026-02-13T14:26:30.948Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"859f9b82-41fb-90bb-b1ce-c5cf640ebe78"}
+2026-02-13T14:27:52.443Z [ws] ⇄ res ✓ sessions.usage 272ms conn=3f142b7e…349c id=8eec642c…da86
+2026-02-13T14:28:03.607Z [memory] embeddings rate limited; retrying in 594ms
+2026-02-13T14:28:04.237Z [memory] embeddings rate limited; retrying in 1042ms
+2026-02-13T14:28:05.317Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"fb0df075-e3ed-9bb6-890d-c7b8e4e5fbf2"}
+2026-02-13T14:28:40.012Z [memory] embeddings rate limited; retrying in 564ms
+2026-02-13T14:28:40.014Z [memory] embeddings rate limited; retrying in 544ms
+2026-02-13T14:28:40.015Z [memory] embeddings rate limited; retrying in 592ms
+2026-02-13T14:28:40.593Z [memory] embeddings rate limited; retrying in 1068ms
+2026-02-13T14:28:41.708Z [memory] embeddings rate limited; retrying in 2308ms
+2026-02-13T14:28:44.056Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"57b2789a-a856-9903-939e-27f911c31e4c"}
+2026-02-13T14:30:00.463Z [memory] embeddings rate limited; retrying in 545ms
+2026-02-13T14:30:00.471Z [memory] embeddings rate limited; retrying in 578ms
+2026-02-13T14:30:01.059Z [memory] embeddings rate limited; retrying in 1180ms
+2026-02-13T14:30:01.092Z [memory] embeddings rate limited; retrying in 1160ms
+2026-02-13T14:30:02.281Z [memory] embeddings rate limited; retrying in 2175ms
+2026-02-13T14:30:04.503Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"9d1453a1-bceb-99c1-94b6-e1b602402a99"}
+2026-02-13T14:31:16.218Z [tools] exec failed: ����λ�� ��:1 �ַ�: 30
++ mkdir -p /tmp/mail-forwarder && cd /tmp/mail-forwarder && git init
++                              ~~
+��ǡ�&&�����Ǵ˰汾�е���Ч���ָ�����
+����λ�� ��:1 �ַ�: 56
++ mkdir -p /tmp/mail-forwarder && cd /tmp/mail-forwarder && git init
++                                                        ~~
+��ǡ�&&�����Ǵ˰汾�е���Ч���ָ�����
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : InvalidEndOfLine
+
+Command exited with code 1
+2026-02-13T14:32:04.898Z [tools] exec failed: bash : �޷�����bash����ʶ��Ϊ cmdlet���������ű��ļ�������г�������ơ��������Ƶ�ƴд���������·������ȷ��·����ȷ��Ȼ��
+����һ�Ρ�
+����λ�� ��:1 �ַ�: 1
++ bash pty:true workdir:/tmp/mail-forwarder command:"codex exec --full- ...
++ ~~~~
+    + CategoryInfo          : ObjectNotFound: (bash:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+Command exited with code 1
+2026-02-13T14:33:51.939Z [memory] embeddings rate limited; retrying in 583ms
+2026-02-13T14:33:51.962Z [memory] embeddings rate limited; retrying in 534ms
+2026-02-13T14:33:51.972Z [memory] embeddings rate limited; retrying in 535ms
+2026-02-13T14:33:52.547Z [memory] embeddings rate limited; retrying in 1079ms
+2026-02-13T14:33:52.594Z [memory] embeddings rate limited; retrying in 1058ms
+2026-02-13T14:33:54.771Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"da0a9d98-9fa3-99e6-9ac1-1ea7f67c85ec"}
+2026-02-13T14:34:03.191Z [memory] embeddings rate limited; retrying in 568ms
+2026-02-13T14:34:03.197Z [memory] embeddings rate limited; retrying in 598ms
+2026-02-13T14:34:03.847Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"ce0a64b9-076a-9b70-9335-06fc015e82af"}
+2026-02-13T14:38:44.640Z [reload] config change detected; evaluating reload (meta.lastTouchedAt, models.providers.nvidia.models, models.providers.openai.models, agents.defaults.cliBackends, tools.media.audio.models)
+2026-02-13T14:38:44.642Z [reload] config change applied (dynamic reads: meta.lastTouchedAt, models.providers.nvidia.models, models.providers.openai.models, agents.defaults.cliBackends, tools.media.audio.models)
+2026-02-13T14:40:14.781Z [memory] embeddings rate limited; retrying in 523ms
+2026-02-13T14:40:15.346Z [memory] embeddings rate limited; retrying in 1049ms
+2026-02-13T14:40:16.431Z [memory] embeddings rate limited; retrying in 2250ms
+2026-02-13T14:40:18.733Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"49add611-8e47-966f-9502-0e4f0976e4ad"}
+2026-02-13T14:41:04.137Z [memory] embeddings rate limited; retrying in 557ms
+2026-02-13T14:41:04.740Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"1ae38e29-7be8-9b54-8fd3-b76a0820cabe"}
+2026-02-13T14:50:37.850Z [memory] embeddings rate limited; retrying in 522ms
+2026-02-13T14:50:37.852Z [memory] embeddings rate limited; retrying in 573ms
+2026-02-13T14:50:38.486Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"1fe803e6-5a6b-9ecd-8de6-dece387367b0"}
+2026-02-13T14:50:40.590Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"ab603281-6200-9617-ba2c-b4ff3741bc55"}
+2026-02-13T14:52:05.726Z [memory] embeddings rate limited; retrying in 517ms
+2026-02-13T14:52:06.283Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"bad10b2e-14da-93fa-b4c1-b2d9c91aa30e"}
+2026-02-13T14:52:58.383Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"54aa27ff-ffb7-9f2e-89a1-fcfa8adefb69"}
+2026-02-13T14:55:45.322Z [reload] config change detected; evaluating reload (meta.lastTouchedAt, models.providers.nvidia.models, models.providers.openai.models, agents.defaults.models.openai-codex/gpt-5.3-codex, tools.media.audio.models)
+2026-02-13T14:55:45.324Z [reload] config change applied (dynamic reads: meta.lastTouchedAt, models.providers.nvidia.models, models.providers.openai.models, agents.defaults.models.openai-codex/gpt-5.3-codex, tools.media.audio.models)
+2026-02-13T14:56:58.580Z [ws] webchat disconnected code=1001 reason=n/a conn=3f142b7e-8a50-4c3d-a681-ae34c0c5349c
+2026-02-13T14:56:59.029Z [ws] webchat connected conn=fd1641f0-bb80-4eb6-bf13-44ec5ccffb31 remote=127.0.0.1 client=openclaw-control-ui webchat vdev
+2026-02-13T14:59:05.108Z [ws] webchat disconnected code=1001 reason=n/a conn=fd1641f0-bb80-4eb6-bf13-44ec5ccffb31
+2026-02-13T14:59:05.530Z [ws] webchat connected conn=099e217f-cf78-4911-83ce-3f06fba5a6f5 remote=127.0.0.1 client=openclaw-control-ui webchat vdev
+2026-02-13T15:00:48.067Z [memory] embeddings rate limited; retrying in 598ms
+2026-02-13T15:00:48.700Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"9065e99b-cf64-9e93-9349-dff918fc1d1a"}
+2026-02-13T15:01:09.303Z [memory] embeddings rate limited; retrying in 550ms
+2026-02-13T15:01:09.309Z [memory] embeddings rate limited; retrying in 595ms
+2026-02-13T15:01:09.896Z [memory] embeddings rate limited; retrying in 1200ms
+2026-02-13T15:01:11.140Z [memory] embeddings rate limited; retrying in 2265ms
+2026-02-13T15:01:13.436Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"98e238d2-3244-944d-89a8-849cce8248b9"}
+2026-02-13T15:01:22.094Z [memory] embeddings rate limited; retrying in 569ms
+2026-02-13T15:01:22.098Z [memory] embeddings rate limited; retrying in 556ms
+2026-02-13T15:01:22.705Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"61054b8c-376c-9c96-82b4-5b21e7ff7c3d"}
+2026-02-13T15:03:20.288Z [memory] embeddings rate limited; retrying in 590ms
+2026-02-13T15:03:20.927Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"e1fcc8fb-d0eb-980b-9487-e2ba6d9791fc"}
+2026-02-13T15:03:45.201Z [ws] webchat disconnected code=1001 reason=n/a conn=099e217f-cf78-4911-83ce-3f06fba5a6f5
+2026-02-13T15:03:45.712Z [ws] webchat connected conn=52988a1d-0cfa-477e-b13f-fd1838efeac2 remote=127.0.0.1 client=openclaw-control-ui webchat vdev
+2026-02-13T15:04:21.215Z [memory] embeddings rate limited; retrying in 571ms
+2026-02-13T15:04:21.216Z [memory] embeddings rate limited; retrying in 504ms
+2026-02-13T15:04:21.828Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"7f0e75d7-1cd2-9b9c-8428-8f4409888d7e"}
+2026-02-13T15:04:44.017Z [memory] embeddings rate limited; retrying in 537ms
+2026-02-13T15:04:44.019Z [memory] embeddings rate limited; retrying in 566ms
+2026-02-13T15:04:44.022Z [memory] embeddings rate limited; retrying in 583ms
+2026-02-13T15:04:44.664Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"946e2321-1821-9420-9907-847a659f996e"}
+2026-02-13T15:05:19.925Z [memory] embeddings rate limited; retrying in 592ms
+2026-02-13T15:05:20.574Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"5d1d9bde-fcd9-958c-a976-aedad61e68ea"}
+2026-02-13T15:07:52.793Z [memory] embeddings rate limited; retrying in 503ms
+2026-02-13T15:07:52.799Z [memory] embeddings rate limited; retrying in 581ms
+2026-02-13T15:07:52.802Z [memory] embeddings rate limited; retrying in 527ms
+2026-02-13T15:07:53.376Z [memory] embeddings rate limited; retrying in 1000ms
+2026-02-13T15:07:54.416Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"0d2f6873-b065-9d6e-ad4d-2475aee254a4"}
+2026-02-13T15:08:52.991Z [memory] embeddings rate limited; retrying in 534ms
+2026-02-13T15:08:53.006Z [memory] embeddings rate limited; retrying in 524ms
+2026-02-13T15:08:53.007Z [memory] embeddings rate limited; retrying in 509ms
+2026-02-13T15:08:53.551Z [memory] embeddings rate limited; retrying in 1153ms
+2026-02-13T15:08:54.748Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"232cf844-bd6f-9a50-9e32-5f8410e6cf71"}
+2026-02-13T15:09:34.173Z [memory] embeddings rate limited; retrying in 572ms
+2026-02-13T15:09:34.793Z [memory] embeddings rate limited; retrying in 1050ms
+2026-02-13T15:09:35.892Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"8267f798-ec66-9b53-8a70-1c9c5b63ab0c"}
+2026-02-13T15:11:08.191Z [memory] embeddings rate limited; retrying in 517ms
+2026-02-13T15:11:08.193Z [memory] embeddings rate limited; retrying in 539ms
+2026-02-13T15:11:08.774Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"8eae1a97-6791-9bf0-a8f4-4bbae319ca64"}
+2026-02-13T15:11:25.520Z [tools] exec failed: C:\Users\Administrator\.openclaw\workspace\memory\test-uid-logic.js:152
+   .currentEmail = { uid, raw: bodyLines.join('\r\n') };
+   ^
+
+SyntaxError: Unexpected token '.'
+    at wrapSafe (node:internal/modules/cjs/loader:1692:18)
+    at Module._compile (node:internal/modules/cjs/loader:1735:20)
+    at Object..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1481:32)
+    at Module._load (node:internal/modules/cjs/loader:1300:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+
+Node.js v24.11.1
+
+Command exited with code 1
+2026-02-13T15:11:48.523Z [memory] embeddings rate limited; retrying in 513ms
+2026-02-13T15:11:48.526Z [memory] embeddings rate limited; retrying in 557ms
+2026-02-13T15:11:48.535Z [memory] embeddings rate limited; retrying in 559ms
+2026-02-13T15:11:49.130Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"cdff995c-4fc4-9f03-9855-29f96fee18f8"}
+2026-02-13T15:12:39.381Z [agent/embedded] embedded run timeout: runId=f945a97d-c40d-42fc-b516-9eda5a158cb9 sessionId=62e0db52-9d54-46ab-a57a-b6b684c2a265 timeoutMs=600000
+2026-02-13T15:12:39.833Z [ws] ⇄ res ✓ chat.history 60ms conn=52988a1d…eac2 id=a1843c67…1f1c
+2026-02-13T15:15:14.449Z [memory] embeddings rate limited; retrying in 572ms
+2026-02-13T15:15:15.072Z [memory] embeddings rate limited; retrying in 1011ms
+2026-02-13T15:15:16.140Z [memory] embeddings rate limited; retrying in 2324ms
+2026-02-13T15:15:18.517Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"97459023-4274-9399-ac3f-d16b41f1862a"}
+2026-02-13T15:20:20.365Z [memory] embeddings rate limited; retrying in 555ms
+2026-02-13T15:20:20.376Z [memory] embeddings rate limited; retrying in 544ms
+2026-02-13T15:20:20.956Z [memory] embeddings rate limited; retrying in 1139ms
+2026-02-13T15:20:22.145Z [memory] embeddings rate limited; retrying in 2016ms
+2026-02-13T15:20:24.211Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"7c7cb508-a39b-99e9-8a5f-32b0e1f2a335"}
+2026-02-13T15:21:35.419Z [ws] webchat disconnected code=1001 reason=n/a conn=52988a1d-0cfa-477e-b13f-fd1838efeac2
+2026-02-13T15:21:35.865Z [ws] webchat connected conn=00b6a9da-a8bc-4a4b-bb0b-a60af303fe17 remote=127.0.0.1 client=openclaw-control-ui webchat vdev
+2026-02-13T15:21:36.435Z [tools] edit failed: Could not find the exact text in memory/auto-mail-forwarder.js. The old text must match exactly including all whitespace and newlines.
+2026-02-13T15:22:07.852Z [memory] embeddings rate limited; retrying in 537ms
+2026-02-13T15:22:07.853Z [memory] embeddings rate limited; retrying in 519ms
+2026-02-13T15:22:08.405Z [memory] embeddings rate limited; retrying in 1137ms
+2026-02-13T15:22:09.592Z [memory] embeddings rate limited; retrying in 2170ms
+2026-02-13T15:22:11.807Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"8dd1f43a-1c2e-9e9e-8cd0-f34d49bcda2f"}
+2026-02-13T15:22:39.532Z [agent/embedded] embedded run timeout: runId=a4fafb1f-c842-40a7-8d73-765d83adea77 sessionId=62e0db52-9d54-46ab-a57a-b6b684c2a265 timeoutMs=600000
+2026-02-13T15:22:39.547Z [diagnostic] lane wait exceeded: lane=session:agent:main:main waitedMs=294920 queueAhead=0
+2026-02-13T15:23:04.169Z [diagnostic] lane wait exceeded: lane=session:agent:main:main waitedMs=24566 queueAhead=0
+2026-02-13T15:23:14.070Z [ws] ⇄ res ✓ channels.status 139ms conn=00b6a9da…fe17 id=4576c108…b25a
+2026-02-13T15:23:30.244Z [agent/embedded] read tool called without path: toolCallId=call_f06448d017364027a9a0907f argsType=object
+2026-02-13T15:23:30.260Z [tools] read failed: Offset 23 is beyond end of file (3 lines total)
+2026-02-13T15:23:44.646Z [agent/embedded] read tool called without path: toolCallId=call_cfebd0886d6940f4bb610b4e argsType=object
+2026-02-13T15:24:14.656Z [ws] ⇄ res ✓ channels.status 187ms conn=00b6a9da…fe17 id=2b1b59b4…04d4
+2026-02-13T15:24:39.827Z [ws] webchat disconnected code=1001 reason=n/a conn=00b6a9da-a8bc-4a4b-bb0b-a60af303fe17
+2026-02-13T15:24:40.273Z [ws] webchat connected conn=7e6f5fbd-5d96-4a42-8ac6-ff8ce964dd14 remote=127.0.0.1 client=openclaw-control-ui webchat vdev
+2026-02-13T15:24:40.474Z [ws] ⇄ res ✓ channels.status 182ms conn=7e6f5fbd…dd14 id=d254e8ce…dccb
+2026-02-13T15:25:09.782Z [feishu] feishu[main]: received message from ou_096aaf554bba1539b30ea3f3b1fa2921 in oc_5cd4edd79007eb8b7c450bffa1c6f474 (p2p)
+2026-02-13T15:25:09.784Z [feishu] feishu[main]: dispatching to agent (session=agent:main:main)
+2026-02-13T15:25:10.081Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:25:16.080Z [memory] embeddings rate limited; retrying in 517ms
+2026-02-13T15:25:16.081Z [memory] embeddings rate limited; retrying in 552ms
+2026-02-13T15:25:16.090Z [memory] embeddings rate limited; retrying in 594ms
+2026-02-13T15:25:16.091Z [memory] embeddings rate limited; retrying in 535ms
+2026-02-13T15:25:16.376Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:25:16.641Z [memory] embeddings rate limited; retrying in 1169ms
+2026-02-13T15:25:16.669Z [memory] embeddings rate limited; retrying in 1192ms
+2026-02-13T15:25:16.734Z [memory] embeddings rate limited; retrying in 1065ms
+2026-02-13T15:25:17.909Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"7460a03d-05d3-915f-8d6f-2a6eba124cc8"}
+2026-02-13T15:25:22.401Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:25:28.396Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:25:29.344Z [feishu] skipping duplicate message om_x100b57c06b879ca0b20dcea7df41203
+2026-02-13T15:25:34.418Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:25:40.429Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:25:46.436Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:25:52.425Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:25:52.754Z [ws] webchat disconnected code=1001 reason=n/a conn=7e6f5fbd-5d96-4a42-8ac6-ff8ce964dd14
+2026-02-13T15:25:52.904Z [ws] webchat connected conn=837f6cde-9037-4931-8ff3-5c7521d3a61f remote=127.0.0.1 client=openclaw-control-ui webchat vdev
+2026-02-13T15:25:58.604Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:26:04.398Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:26:07.586Z [feishu] feishu[main]: received message from ou_096aaf554bba1539b30ea3f3b1fa2921 in oc_5cd4edd79007eb8b7c450bffa1c6f474 (p2p)
+2026-02-13T15:26:07.587Z [feishu] feishu[main]: dispatching to agent (session=agent:main:main)
+2026-02-13T15:26:07.893Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:26:10.381Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:26:14.141Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:26:16.433Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:26:20.160Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:26:22.444Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:26:26.146Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:26:26.396Z [feishu] skipping duplicate message om_x100b57c0662490a0b348a98faa9e969
+2026-02-13T15:26:28.406Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:26:32.189Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:26:34.413Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:26:38.180Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:26:40.469Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:26:44.230Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:26:46.473Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:26:50.157Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:26:52.429Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:26:56.208Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:26:58.442Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:27:02.177Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:27:04.347Z [ws] webchat disconnected code=1001 reason=n/a conn=837f6cde-9037-4931-8ff3-5c7521d3a61f
+2026-02-13T15:27:04.481Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:27:04.754Z [ws] webchat connected conn=23ff7c10-2202-4d62-8620-7c7e29ff80a8 remote=127.0.0.1 client=openclaw-control-ui webchat vdev
+2026-02-13T15:27:08.205Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:27:09.819Z typing TTL reached (2m); stopping typing indicator
+2026-02-13T15:27:14.185Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:27:20.282Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:27:26.309Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:27:32.318Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:27:38.283Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:27:44.590Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:27:50.356Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:27:52.719Z [diagnostic] lane wait exceeded: lane=session:agent:main:main waitedMs=257554 queueAhead=2
+2026-02-13T15:27:55.503Z [diagnostic] lane wait exceeded: lane=session:agent:main:main waitedMs=165420 queueAhead=2
+2026-02-13T15:27:56.579Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:28:02.370Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:28:07.610Z typing TTL reached (2m); stopping typing indicator
+2026-02-13T15:28:09.093Z [diagnostic] lane wait exceeded: lane=session:agent:main:main waitedMs=121197 queueAhead=1
+2026-02-13T15:28:09.144Z [feishu] feishu[main] deliver called: text=你好！😎 收到了，请问有什么需要帮助的吗？
+2026-02-13T15:28:09.147Z [feishu] feishu[main] deliver: sending 1 text chunks to oc_5cd4edd79007eb8b7c450bffa1c6f474
+2026-02-13T15:28:09.607Z [feishu] feishu[main]: dispatch complete (queuedFinal=true, replies=1)
+2026-02-13T15:28:09.841Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T15:28:09.930Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T15:28:42.117Z [ws] webchat disconnected code=1001 reason=n/a conn=23ff7c10-2202-4d62-8620-7c7e29ff80a8
+2026-02-13T15:28:42.581Z [ws] webchat connected conn=fd5dd971-f0cc-4d49-a14d-1823f1399801 remote=127.0.0.1 client=openclaw-control-ui webchat vdev
+2026-02-13T15:28:43.215Z [diagnostic] lane wait exceeded: lane=session:agent:main:main waitedMs=50437 queueAhead=0
+2026-02-13T15:28:43.258Z [feishu] feishu[main] deliver called: text=收到了！有什么我可以帮你的吗？😎
+2026-02-13T15:28:43.260Z [feishu] feishu[main] deliver: sending 1 text chunks to oc_5cd4edd79007eb8b7c450bffa1c6f474
+2026-02-13T15:28:43.682Z [feishu] feishu[main]: dispatch complete (queuedFinal=true, replies=1)
+2026-02-13T15:28:43.952Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T15:28:43.975Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T15:29:03.153Z [feishu] feishu[main]: received message from ou_096aaf554bba1539b30ea3f3b1fa2921 in oc_5cd4edd79007eb8b7c450bffa1c6f474 (p2p)
+2026-02-13T15:29:03.155Z [feishu] feishu[main]: dispatching to agent (session=agent:main:main)
+2026-02-13T15:29:03.409Z [feishu] feishu[main] deliver called: text=Current: nvidia/z-ai/glm4.7
+
+Switch: /model <provider/model>
+Browse: /models (providers) or /models 
+2026-02-13T15:29:03.412Z [feishu] feishu[main] deliver: sending 1 text chunks to oc_5cd4edd79007eb8b7c450bffa1c6f474
+2026-02-13T15:29:03.825Z [feishu] feishu[main]: dispatch complete (queuedFinal=true, replies=1)
+2026-02-13T15:29:21.899Z [feishu] feishu[main]: received message from ou_096aaf554bba1539b30ea3f3b1fa2921 in oc_5cd4edd79007eb8b7c450bffa1c6f474 (p2p)
+2026-02-13T15:29:21.907Z [feishu] feishu[main]: dispatching to agent (session=agent:main:main)
+2026-02-13T15:29:22.205Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:29:28.453Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:29:34.481Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:29:40.397Z [feishu] skipping duplicate message om_x100b57c07bc014a4b21bf9055312b65
+2026-02-13T15:29:40.476Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:29:46.517Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:29:52.540Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:29:58.509Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:30:04.528Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:30:10.540Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:30:16.179Z [diagnostic] lane wait exceeded: lane=session:agent:main:main waitedMs=53971 queueAhead=0
+2026-02-13T15:30:16.538Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:30:22.803Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:30:28.559Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:30:34.563Z [feishu] feishu[main]: added typing indicator reaction
+2026-02-13T15:30:36.130Z [feishu] feishu[main] deliver called: text=你可以使用 `/models` 命令来查看可用的模型提供商，或者使用 `/models <provider>` 来查看特定提供商的模型列表。
+
+例如：
+- `/models` - 查看所有提供商
+- 
+2026-02-13T15:30:36.132Z [feishu] feishu[main] deliver: sending 1 text chunks to oc_5cd4edd79007eb8b7c450bffa1c6f474
+2026-02-13T15:30:36.623Z [feishu] feishu[main]: dispatch complete (queuedFinal=true, replies=1)
+2026-02-13T15:30:36.876Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T15:30:37.467Z [feishu] feishu[main]: removed typing indicator reaction
+2026-02-13T15:34:23.787Z [tools] cron failed: gateway timeout after 60000ms
+Gateway target: ws://127.0.0.1:18789
+Source: local loopback
+Config: C:\Users\Administrator\.openclaw\openclaw.json
+Bind: loopback
+2026-02-13T15:35:23.419Z [ws] ⇄ res ✓ cron.run 119621ms conn=1272d5ef…0a8b id=955f5a0c…33c9
+2026-02-13T15:36:24.452Z announce queue drain failed for agent:main:main: Error: gateway timeout after 60000ms
+Gateway target: ws://127.0.0.1:18789
+Source: local loopback
+Config: C:\Users\Administrator\.openclaw\openclaw.json
+Bind: loopback
+2026-02-13T15:37:02.360Z [memory] embeddings rate limited; retrying in 531ms
+2026-02-13T15:37:02.926Z [memory] embeddings rate limited; retrying in 1049ms
+2026-02-13T15:37:03.508Z [diagnostic] lane wait exceeded: lane=session:agent:main:main waitedMs=99038 queueAhead=0
+2026-02-13T15:37:04.015Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"4fb5a46a-8b18-9702-9dec-b168937180bd"}
+2026-02-13T15:37:21.580Z 邮件转发任务已执行，成功找到目标邮件但 SMTP 连接失败（脚本配置错误）。我已经修复了这个问题（传入了错误的配置对象），需要我重新运行来验证修复吗？
+2026-02-13T15:40:44.024Z [agent/embedded] read tool called without path: toolCallId=call_6f9a777332a04289aca11cbb argsType=object
+2026-02-13T15:41:11.245Z [memory] embeddings rate limited; retrying in 521ms
+2026-02-13T15:41:11.811Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"d725e0c1-66b9-9e07-856a-c8ef277863fd"}
+2026-02-13T15:41:19.531Z [memory] embeddings rate limited; retrying in 502ms
+2026-02-13T15:41:20.071Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"028db702-e9fc-93d0-8ac9-20862aa6609f"}
+2026-02-13T15:41:35.855Z [memory] embeddings rate limited; retrying in 551ms
+2026-02-13T15:41:35.857Z [memory] embeddings rate limited; retrying in 505ms
+2026-02-13T15:41:36.441Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"c6446c81-b929-905d-b5e0-5a1c05ba48df"}
+2026-02-13T15:41:48.125Z [agent/embedded] read tool called without path: toolCallId=call_3dbc4b743c92415e9d136302 argsType=object
+2026-02-13T15:42:01.264Z [memory] embeddings rate limited; retrying in 554ms
+2026-02-13T15:42:01.268Z [memory] embeddings rate limited; retrying in 576ms
+2026-02-13T15:42:01.894Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"f7cb8e68-c984-92d9-ba27-41022358bded"}
+2026-02-13T15:44:24.563Z [ws] webchat disconnected code=1001 reason=n/a conn=fd5dd971-f0cc-4d49-a14d-1823f1399801
+2026-02-13T15:44:24.994Z [ws] webchat connected conn=039fabff-ca61-4684-b7ef-36adbd8c4d02 remote=127.0.0.1 client=openclaw-control-ui webchat vdev
+2026-02-13T15:48:43.393Z [tools] edit failed: Missing required parameter: newText (newText or new_string)
+2026-02-13T15:49:01.736Z [memory] embeddings rate limited; retrying in 562ms
+2026-02-13T15:49:02.364Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"cc22eef3-5ce2-9c58-8186-0a40957cbc7b"}
+2026-02-13T15:49:15.442Z [tools] read failed: ENOENT: no such file or directory, access 'C:\Users\Administrator\.openclaw\workspace\MEMORY.md'
+2026-02-13T15:49:50.955Z [agent/embedded] read tool called without path: toolCallId=call_f3b5a1d8b69c4cc0a97a18af argsType=object
+2026-02-13T15:50:04.450Z [agent/embedded] read tool called without path: toolCallId=call_e127a9dbb61548868dc6a433 argsType=object
+2026-02-13T15:50:15.943Z [agent/embedded] read tool called without path: toolCallId=call_512875fb4b52480e929e67b6 argsType=object
+2026-02-13T15:50:42.782Z [memory] embeddings rate limited; retrying in 524ms
+2026-02-13T15:50:42.789Z [memory] embeddings rate limited; retrying in 567ms
+2026-02-13T15:50:42.794Z [memory] embeddings rate limited; retrying in 522ms
+2026-02-13T15:50:43.412Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"f2b103b4-9219-93d6-8238-6a59a7ae61f0"}
+2026-02-13T15:50:50.507Z [agent/embedded] read tool called without path: toolCallId=call_4708b4fe888345c59a72a1b0 argsType=object
+2026-02-13T15:51:23.758Z [memory] embeddings rate limited; retrying in 578ms
+2026-02-13T15:51:23.775Z [memory] embeddings rate limited; retrying in 502ms
+2026-02-13T15:51:24.365Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"b42477a4-df33-935c-b008-d317299bc4ea"}
+2026-02-13T15:51:42.885Z [agent/embedded] read tool called without path: toolCallId=call_465405f797d94062b581f4a9 argsType=object
+2026-02-13T15:52:23.199Z [memory] embeddings rate limited; retrying in 504ms
+2026-02-13T15:52:23.221Z [memory] embeddings rate limited; retrying in 598ms
+2026-02-13T15:52:23.864Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"4bb44d9e-adf7-96c5-90bf-8722844abc75"}
+2026-02-13T15:53:37.728Z [tools] exec failed: ����λ�� ��:1 �ַ�: 11
++ cd memory && npm install imap
++           ~~
+��ǡ�&&�����Ǵ˰汾�е���Ч���ָ�����
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : InvalidEndOfLine
+
+Command exited with code 1
+2026-02-13T15:53:54.836Z [reload] config change detected; evaluating reload (meta.lastTouchedAt, models.providers.nvidia.models, models.providers.openai.models, agents.defaults.workspace, tools.media.audio.models)
+2026-02-13T15:53:54.840Z [reload] config change applied (dynamic reads: meta.lastTouchedAt, models.providers.nvidia.models, models.providers.openai.models, agents.defaults.workspace, tools.media.audio.models)
+2026-02-13T15:54:09.331Z [memory] embeddings rate limited; retrying in 534ms
+2026-02-13T15:54:09.900Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"b62ad361-751e-9bfa-b48a-b93db1e80ac0"}
+2026-02-13T15:54:49.525Z [memory] embeddings rate limited; retrying in 515ms
+2026-02-13T15:54:49.539Z [memory] embeddings rate limited; retrying in 528ms
+2026-02-13T15:54:49.542Z [memory] embeddings rate limited; retrying in 599ms
+2026-02-13T15:54:50.188Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"17784c60-fb1d-9cd3-bd4e-12f7cfb55c2f"}
+2026-02-13T15:55:23.211Z [tools] exec failed: ����λ�� ��:1 �ַ�: 11
++ cd memory && node auto-mail-forwarder-v2.js --test
++           ~~
+��ǡ�&&�����Ǵ˰汾�е���Ч���ָ�����
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : InvalidEndOfLine
+
+Command exited with code 1
+2026-02-13T15:55:50.798Z [tools] exec failed: ============================================================
+自动化邮件转发（含附件） - 测试模式
+============================================================
+搜索范围：上个月1号开始
+匹配规则：发件人为 "report@ant.shop" 且主题包含"影城对账单"
+✅ SMTP配置验证成功
+
+步骤1: 搜索 2026-01-01 开始的邮件...
+
+✅ IMAP连接成功
+
+步骤2: 搜索邮件...
+找到 573 封邮件
+
+步骤3: 检查邮件 1-10/573...
+C:\Users\Administrator\.openclaw\workspace\memory\auto-mail-forwarder-v2.js:171
+            const struct = msg.attributes.struct;
+                                          ^
+
+TypeError: Cannot read properties of undefined (reading 'struct')
+    at EventEmitter.<anonymous> (C:\Users\Administrator\.openclaw\workspace\memory\auto-mail-forwarder-v2.js:171:43)
+    at Object.onceWrapper (node:events:622:28)
+    at EventEmitter.emit (node:events:508:28)
+    at C:\Users\Administrator\.openclaw\workspace\memory\node_modules\imap\lib\Connection.js:1470:22
+    at process.processTicksAndRejections (node:internal/process/task_queues:84:11)
+
+Node.js v24.11.1
+
+Command exited with code 1
+2026-02-13T15:56:11.976Z [tools] edit failed: Missing required parameter: oldText (oldText or old_string)
+2026-02-13T15:56:34.305Z [memory] embeddings rate limited; retrying in 515ms
+2026-02-13T15:56:34.850Z [memory] sync failed (watch): Error: openai embeddings failed: 404 {"error":{"message":"The model `text-embedding-3-small` does not exist or you do not have access to it.","type":"invalid_request_error","param":null,"code":"model_not_found"},"request_id":"9c1a2130-5dbc-9c62-b662-1c9985e6ce7a"}
+2026-02-13T15:56:48.210Z [agent/embedded] read tool called without path: toolCallId=call_6ee8a9ce81b44abb9a8aa9ac argsType=object
+ ELIFECYCLE  Command failed with exit code 4294967295.

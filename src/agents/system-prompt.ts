@@ -234,7 +234,8 @@ export function buildAgentSystemPrompt(params: {
     nodes: "List/describe/notify/camera/screen on paired nodes",
     cron: "Manage cron jobs and wake events (use for reminders; when scheduling a reminder, write the systemEvent text as something that will read like a reminder when it fires, and mention that it is a reminder depending on the time gap between setting and firing; include recent context in reminder text if appropriate)",
     message: "Send messages and channel actions",
-    gateway: "Restart, apply config, or run updates on the running OpenClaw process",
+    gateway:
+      "Restart, apply config, run updates, or read gateway usage summaries (usage.status/usage.cost/usage.sessions)",
     agents_list: "List agent ids allowed for sessions_spawn",
     sessions_list: "List other sessions (incl. sub-agents) with filters/last",
     sessions_history: "Fetch history for another session/sub-agent",
@@ -430,6 +431,7 @@ export function buildAgentSystemPrompt(params: {
           "Get Updates (self-update) is ONLY allowed when the user explicitly asks for it.",
           "Do not run config.apply or update.run unless the user explicitly requests an update or config change; if it's not explicit, ask first.",
           "Actions: config.get, config.schema, config.apply (validate + write full config, then restart), update.run (update deps or git, then restart).",
+          "For token/cost usage summaries (today/this week/etc.), use gateway read-only actions first: usage.sessions, usage.cost, usage.status.",
           "After restart, OpenClaw pings the last active session automatically.",
         ].join("\n")
       : "",

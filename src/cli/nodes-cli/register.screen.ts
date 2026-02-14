@@ -5,8 +5,11 @@ import { defaultRuntime } from "../../runtime.js";
 import { shortenHomePath } from "../../utils.js";
 import {
   parseScreenRecordPayload,
+  parseScreenSnapshotPayload,
   screenRecordTempPath,
+  screenSnapshotTempPath,
   writeScreenRecordToFile,
+  writeScreenSnapshotToFile,
 } from "../nodes-screen.js";
 import { parseDurationMs } from "../parse-duration.js";
 import { runNodesCommand } from "./cli-utils.js";
@@ -15,7 +18,76 @@ import { callGatewayCli, nodesCallOpts, resolveNodeId } from "./rpc.js";
 export function registerNodesScreenCommands(nodes: Command) {
   const screen = nodes
     .command("screen")
-    .description("Capture screen recordings from a paired node");
+    .description("Capture screen snapshots and recordings from a paired node");
+
+  nodesCallOpts(
+    screen
+      .command("snapshot")
+      .description("Capture a screen snapshot from a node (prints MEDIA:<path>)")
+      .requiredOption("--node <idOrNameOrIp>", "Node id, name, or IP")
+      .option("--format <png|jpg|jpeg>", "Image format", "png")
+      .option("--screen <index>", "Screen index (0 = primary)", "0")
+      .option("--out <path>", "Output path")
+      .option("--invoke-timeout <ms>", "Node invoke timeout in ms (default 20000)", "20000")
+      .action(async (opts: NodesRpcOpts & { out?: string }) => {
+        await runNodesCommand("screen snapshot", async () => {
+          const nodeId = await resolveNodeId(opts, String(opts.node ?? ""));
+          const formatOpt = String(opts.format ?? "png")
+            .trim()
+            .toLowerCase();
+          const formatForParams =
+            formatOpt === "jpg" ? "jpeg" : formatOpt === "jpeg" ? "jpeg" : "png";
+          if (formatForParams !== "png" && formatForParams !== "jpeg") {
+            throw new Error(`invalid format: ${String(opts.format)} (expected png|jpg|jpeg)`);
+          }
+          const screenIndex = Number.parseInt(String(opts.screen ?? "0"), 10);
+          const timeoutMs = opts.invokeTimeout
+            ? Number.parseInt(String(opts.invokeTimeout), 10)
+            : undefined;
+
+          const invokeParams: Record<string, unknown> = {
+            nodeId,
+            command: "screen.snapshot",
+            params: {
+              format: formatForParams,
+              screenIndex: Number.isFinite(screenIndex) ? screenIndex : undefined,
+            },
+            idempotencyKey: randomIdempotencyKey(),
+          };
+          if (typeof timeoutMs === "number" && Number.isFinite(timeoutMs)) {
+            invokeParams.timeoutMs = timeoutMs;
+          }
+
+          const raw = await callGatewayCli("node.invoke", opts, invokeParams);
+          const res = typeof raw === "object" && raw !== null ? (raw as { payload?: unknown }) : {};
+          const payload = parseScreenSnapshotPayload(res.payload);
+          const ext = payload.format === "jpeg" ? "jpg" : payload.format;
+          const filePath = opts.out ?? screenSnapshotTempPath({ ext });
+          const written = await writeScreenSnapshotToFile(filePath, payload.base64);
+
+          if (opts.json) {
+            defaultRuntime.log(
+              JSON.stringify(
+                {
+                  file: {
+                    path: written.path,
+                    format: payload.format,
+                    width: payload.width,
+                    height: payload.height,
+                    screenIndex: payload.screenIndex,
+                  },
+                },
+                null,
+                2,
+              ),
+            );
+            return;
+          }
+          defaultRuntime.log(`MEDIA:${shortenHomePath(written.path)}`);
+        });
+      }),
+    { timeoutMs: 60_000 },
+  );
 
   nodesCallOpts(
     screen

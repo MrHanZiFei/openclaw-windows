@@ -38,10 +38,13 @@ const MIME_BY_EXT: Record<string, string> = {
   ...Object.fromEntries(Object.entries(EXT_BY_MIME).map(([mime, ext]) => [ext, mime])),
   // Additional extension aliases
   ".jpeg": "image/jpeg",
+  // Some clients/middleware incorrectly label OGG as .agg.
+  ".agg": "audio/ogg",
 };
 
 const AUDIO_FILE_EXTENSIONS = new Set([
   ".aac",
+  ".agg",
   ".caf",
   ".flac",
   ".m4a",

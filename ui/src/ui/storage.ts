@@ -1,12 +1,14 @@
 const KEY = "openclaw.control.settings.v1";
 
 import type { ThemeMode } from "./theme.ts";
+import { detectBrowserLocale, normalizeLocale, type UiLocale } from "./i18n.ts";
 
 export type UiSettings = {
   gatewayUrl: string;
   token: string;
   sessionKey: string;
   lastActiveSessionKey: string;
+  locale: UiLocale;
   theme: ThemeMode;
   chatFocusMode: boolean;
   chatShowThinking: boolean;
@@ -26,6 +28,7 @@ export function loadSettings(): UiSettings {
     token: "",
     sessionKey: "main",
     lastActiveSessionKey: "main",
+    locale: detectBrowserLocale(),
     theme: "system",
     chatFocusMode: false,
     chatShowThinking: true,
@@ -55,6 +58,7 @@ export function loadSettings(): UiSettings {
           ? parsed.lastActiveSessionKey.trim()
           : (typeof parsed.sessionKey === "string" && parsed.sessionKey.trim()) ||
             defaults.lastActiveSessionKey,
+      locale: parsed.locale ? normalizeLocale(parsed.locale) : defaults.locale,
       theme:
         parsed.theme === "light" || parsed.theme === "dark" || parsed.theme === "system"
           ? parsed.theme

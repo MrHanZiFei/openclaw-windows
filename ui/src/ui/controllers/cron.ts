@@ -1,6 +1,7 @@
 import type { GatewayBrowserClient } from "../gateway.ts";
 import type { CronJob, CronRunLogEntry, CronStatus } from "../types.ts";
 import type { CronFormState } from "../ui-types.ts";
+import { DEFAULT_CRON_FORM } from "../app-defaults.ts";
 import { toNumber } from "../format.ts";
 
 export type CronState = {
@@ -11,6 +12,7 @@ export type CronState = {
   cronStatus: CronStatus | null;
   cronError: string | null;
   cronForm: CronFormState;
+  cronEditingJobId?: string | null;
   cronRunsJobId: string | null;
   cronRuns: CronRunLogEntry[];
   cronBusy: boolean;
@@ -42,11 +44,99 @@ export async function loadCronJobs(state: CronState) {
       includeDisabled: true,
     });
     state.cronJobs = Array.isArray(res.jobs) ? res.jobs : [];
+    if (
+      state.cronEditingJobId &&
+      !state.cronJobs.some((job) => job.id === state.cronEditingJobId)
+    ) {
+      state.cronEditingJobId = null;
+    }
   } catch (err) {
     state.cronError = String(err);
   } finally {
     state.cronLoading = false;
   }
+}
+
+function formatDateTimeLocal(iso: string) {
+  const ms = Date.parse(iso);
+  if (!Number.isFinite(ms)) {
+    return "";
+  }
+  const d = new Date(ms);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function resolveEveryForm(everyMs: number): {
+  everyAmount: string;
+  everyUnit: CronFormState["everyUnit"];
+} {
+  if (everyMs % 86_400_000 === 0) {
+    return { everyAmount: String(everyMs / 86_400_000), everyUnit: "days" };
+  }
+  if (everyMs % 3_600_000 === 0) {
+    return { everyAmount: String(everyMs / 3_600_000), everyUnit: "hours" };
+  }
+  if (everyMs % 60_000 === 0) {
+    return { everyAmount: String(everyMs / 60_000), everyUnit: "minutes" };
+  }
+  return {
+    everyAmount: String(Number((everyMs / 60_000).toFixed(4))),
+    everyUnit: "minutes",
+  };
+}
+
+export function cronFormFromJob(job: CronJob): CronFormState {
+  const base: CronFormState = {
+    ...DEFAULT_CRON_FORM,
+    name: job.name,
+    description: job.description ?? "",
+    agentId: job.agentId ?? "",
+    enabled: job.enabled,
+    sessionTarget: job.sessionTarget,
+    wakeMode: job.wakeMode,
+  };
+
+  if (job.schedule.kind === "at") {
+    base.scheduleKind = "at";
+    base.scheduleAt = formatDateTimeLocal(job.schedule.at);
+  } else if (job.schedule.kind === "every") {
+    base.scheduleKind = "every";
+    const every = resolveEveryForm(job.schedule.everyMs);
+    base.everyAmount = every.everyAmount;
+    base.everyUnit = every.everyUnit;
+  } else {
+    base.scheduleKind = "cron";
+    base.cronExpr = job.schedule.expr;
+    base.cronTz = job.schedule.tz ?? "";
+  }
+
+  if (job.payload.kind === "systemEvent") {
+    base.payloadKind = "systemEvent";
+    base.payloadText = job.payload.text;
+    base.timeoutSeconds = "";
+  } else {
+    base.payloadKind = "agentTurn";
+    base.payloadText = job.payload.message;
+    base.timeoutSeconds =
+      typeof job.payload.timeoutSeconds === "number" ? String(job.payload.timeoutSeconds) : "";
+  }
+
+  base.deliveryMode = job.delivery?.mode === "none" ? "none" : "announce";
+  base.deliveryChannel = job.delivery?.channel ?? "last";
+  base.deliveryTo = job.delivery?.to ?? "";
+  return base;
+}
+
+export function startCronJobEdit(state: CronState, job: CronJob) {
+  state.cronEditingJobId = job.id;
+  state.cronForm = cronFormFromJob(job);
+  state.cronError = null;
+}
+
+export function cancelCronJobEdit(state: CronState) {
+  state.cronEditingJobId = null;
+  state.cronForm = { ...DEFAULT_CRON_FORM };
 }
 
 export function buildCronSchedule(form: CronFormState) {
@@ -132,12 +222,55 @@ export async function addCronJob(state: CronState) {
       throw new Error("Name required.");
     }
     await state.client.request("cron.add", job);
+    state.cronEditingJobId = null;
     state.cronForm = {
       ...state.cronForm,
       name: "",
       description: "",
       payloadText: "",
     };
+    await loadCronJobs(state);
+    await loadCronStatus(state);
+  } catch (err) {
+    state.cronError = String(err);
+  } finally {
+    state.cronBusy = false;
+  }
+}
+
+export async function updateCronJob(state: CronState, jobId: string) {
+  if (!state.client || !state.connected || state.cronBusy) {
+    return;
+  }
+  state.cronBusy = true;
+  state.cronError = null;
+  try {
+    const name = state.cronForm.name.trim();
+    if (!name) {
+      throw new Error("Name required.");
+    }
+    const schedule = buildCronSchedule(state.cronForm);
+    const payload = buildCronPayload(state.cronForm);
+    const patch: Record<string, unknown> = {
+      name,
+      description: state.cronForm.description.trim(),
+      agentId: state.cronForm.agentId.trim() || null,
+      enabled: state.cronForm.enabled,
+      schedule,
+      sessionTarget: state.cronForm.sessionTarget,
+      wakeMode: state.cronForm.wakeMode,
+      payload,
+    };
+    if (state.cronForm.sessionTarget === "isolated" && state.cronForm.payloadKind === "agentTurn") {
+      patch.delivery = {
+        mode: state.cronForm.deliveryMode === "announce" ? "announce" : "none",
+        channel: state.cronForm.deliveryChannel.trim() || "last",
+        to: state.cronForm.deliveryTo.trim() || undefined,
+      };
+    }
+    await state.client.request("cron.update", { id: jobId, patch });
+    state.cronEditingJobId = null;
+    state.cronForm = { ...DEFAULT_CRON_FORM };
     await loadCronJobs(state);
     await loadCronStatus(state);
   } catch (err) {
@@ -188,6 +321,10 @@ export async function removeCronJob(state: CronState, job: CronJob) {
   state.cronError = null;
   try {
     await state.client.request("cron.remove", { id: job.id });
+    if (state.cronEditingJobId === job.id) {
+      state.cronEditingJobId = null;
+      state.cronForm = { ...DEFAULT_CRON_FORM };
+    }
     if (state.cronRunsJobId === job.id) {
       state.cronRunsJobId = null;
       state.cronRuns = [];

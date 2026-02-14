@@ -20,7 +20,7 @@ function parsePortWithFallback(value: unknown, fallback: number): number {
 export function registerNodeCli(program: Command) {
   const node = program
     .command("node")
-    .description("Run a headless node host (system.run/system.which)")
+    .description("Run a headless node host (system.run/system.which/screen.snapshot)")
     .addHelpText(
       "after",
       () =>

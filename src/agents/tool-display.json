@@ -137,6 +137,10 @@
           "label": "camera clip",
           "detailKeys": ["node", "nodeId", "facing", "duration", "durationMs"]
         },
+        "screen_snapshot": {
+          "label": "screen snapshot",
+          "detailKeys": ["node", "nodeId", "screenFormat", "screenIndex"]
+        },
         "screen_record": {
           "label": "screen record",
           "detailKeys": ["node", "nodeId", "duration", "durationMs", "fps", "screenIndex"]

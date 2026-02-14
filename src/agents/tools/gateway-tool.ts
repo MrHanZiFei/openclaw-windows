@@ -34,6 +34,9 @@ const GATEWAY_ACTIONS = [
   "config.apply",
   "config.patch",
   "update.run",
+  "usage.status",
+  "usage.cost",
+  "usage.sessions",
 ] as const;
 
 // NOTE: Using a flattened object schema instead of Type.Union([Type.Object(...), ...])
@@ -55,11 +58,73 @@ const GatewayToolSchema = Type.Object({
   sessionKey: Type.Optional(Type.String()),
   note: Type.Optional(Type.String()),
   restartDelayMs: Type.Optional(Type.Number()),
+  // usage.cost, usage.sessions
+  startDate: Type.Optional(Type.String()),
+  endDate: Type.Optional(Type.String()),
+  days: Type.Optional(Type.Number()),
+  // usage.sessions
+  key: Type.Optional(Type.String()),
+  limit: Type.Optional(Type.Number()),
+  includeContextWeight: Type.Optional(Type.Boolean()),
 });
 // NOTE: We intentionally avoid top-level `allOf`/`anyOf`/`oneOf` conditionals here:
 // - OpenAI rejects tool schemas that include these keywords at the *top-level*.
 // - Claude/Vertex has other JSON Schema quirks.
 // Conditional requirements (like `raw` for config.apply) are enforced at runtime.
+
+const ISO_DAY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+function formatUtcDay(date: Date): string {
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(date.getUTCDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function normalizeIsoDay(value: unknown, fieldName: "startDate" | "endDate"): string | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+  if (!ISO_DAY_PATTERN.test(trimmed)) {
+    throw new Error(`${fieldName} must use YYYY-MM-DD format`);
+  }
+  return trimmed;
+}
+
+function resolveUsageDateRange(params: Record<string, unknown>): {
+  startDate?: string;
+  endDate?: string;
+} {
+  const startDate = normalizeIsoDay(params.startDate, "startDate");
+  const endDate = normalizeIsoDay(params.endDate, "endDate");
+  if (startDate || endDate) {
+    return {
+      startDate: startDate ?? endDate,
+      endDate: endDate ?? startDate,
+    };
+  }
+
+  const daysRaw = params.days;
+  const days =
+    typeof daysRaw === "number" && Number.isFinite(daysRaw) ? Math.max(1, Math.floor(daysRaw)) : 0;
+  if (!days) {
+    return {};
+  }
+
+  const today = new Date();
+  const utcToday = new Date(
+    Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()),
+  );
+  const start = new Date(utcToday.getTime() - (days - 1) * 24 * 60 * 60 * 1000);
+  return {
+    startDate: formatUtcDay(start),
+    endDate: formatUtcDay(utcToday),
+  };
+}
 
 export function createGatewayTool(opts?: {
   agentSessionKey?: string;
@@ -69,7 +134,7 @@ export function createGatewayTool(opts?: {
     label: "Gateway",
     name: "gateway",
     description:
-      "Restart, apply config, or update the gateway in-place (SIGUSR1). Use config.patch for safe partial config updates (merges with existing). Use config.apply only when replacing entire config. Both trigger restart after writing.",
+      "Restart, update, or configure the gateway in-place (SIGUSR1), and read usage summaries. Use config.patch for safe partial config updates (merges with existing). Use config.apply only when replacing entire config. Both trigger restart after writing.",
     parameters: GatewayToolSchema,
     execute: async (_toolCallId, args) => {
       const params = args as Record<string, unknown>;
@@ -170,6 +235,35 @@ export function createGatewayTool(opts?: {
       }
       if (action === "config.schema") {
         const result = await callGatewayTool("config.schema", gatewayOpts, {});
+        return jsonResult({ ok: true, result });
+      }
+      if (action === "usage.status") {
+        const result = await callGatewayTool("usage.status", gatewayOpts, {});
+        return jsonResult({ ok: true, result });
+      }
+      if (action === "usage.cost") {
+        const range = resolveUsageDateRange(params);
+        const result = await callGatewayTool("usage.cost", gatewayOpts, range);
+        return jsonResult({ ok: true, result });
+      }
+      if (action === "usage.sessions") {
+        const range = resolveUsageDateRange(params);
+        const key =
+          typeof params.key === "string" && params.key.trim() ? params.key.trim() : undefined;
+        const includeContextWeight =
+          typeof params.includeContextWeight === "boolean"
+            ? params.includeContextWeight
+            : undefined;
+        const limit =
+          typeof params.limit === "number" && Number.isFinite(params.limit)
+            ? Math.max(1, Math.floor(params.limit))
+            : undefined;
+        const result = await callGatewayTool("sessions.usage", gatewayOpts, {
+          ...range,
+          ...(key ? { key } : {}),
+          ...(typeof limit === "number" ? { limit } : {}),
+          ...(typeof includeContextWeight === "boolean" ? { includeContextWeight } : {}),
+        });
         return jsonResult({ ok: true, result });
       }
       if (action === "config.apply") {

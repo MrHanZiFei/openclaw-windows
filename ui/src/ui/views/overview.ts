@@ -2,9 +2,11 @@ import { html } from "lit";
 import type { GatewayHelloOk } from "../gateway.ts";
 import type { UiSettings } from "../storage.ts";
 import { formatRelativeTimestamp, formatDurationHuman } from "../format.ts";
+import { pickLocaleText, type UiLocale } from "../i18n.ts";
 import { formatNextRun } from "../presenter.ts";
 
 export type OverviewProps = {
+  locale: UiLocale;
   connected: boolean;
   hello: GatewayHelloOk | null;
   settings: UiSettings;
@@ -23,11 +25,14 @@ export type OverviewProps = {
 };
 
 export function renderOverview(props: OverviewProps) {
+  const t = (english: string, chinese: string) => pickLocaleText(props.locale, english, chinese);
+  const naLabel = t("n/a", "不可用");
+
   const snapshot = props.hello?.snapshot as
     | { uptimeMs?: number; policy?: { tickIntervalMs?: number } }
     | undefined;
-  const uptime = snapshot?.uptimeMs ? formatDurationHuman(snapshot.uptimeMs) : "n/a";
-  const tick = snapshot?.policy?.tickIntervalMs ? `${snapshot.policy.tickIntervalMs}ms` : "n/a";
+  const uptime = snapshot?.uptimeMs ? formatDurationHuman(snapshot.uptimeMs) : naLabel;
+  const tick = snapshot?.policy?.tickIntervalMs ? `${snapshot.policy.tickIntervalMs}ms` : naLabel;
   const authHint = (() => {
     if (props.connected || !props.lastError) {
       return null;
@@ -42,10 +47,19 @@ export function renderOverview(props: OverviewProps) {
     if (!hasToken && !hasPassword) {
       return html`
         <div class="muted" style="margin-top: 8px">
-          This gateway requires auth. Add a token or password, then click Connect.
+          ${t(
+            "This gateway requires auth. Add a token or password, then click Connect.",
+            "此网关需要鉴权。请填写 token 或密码，然后点击连接。",
+          )}
           <div style="margin-top: 6px">
-            <span class="mono">openclaw dashboard --no-open</span> → open the Control UI<br />
-            <span class="mono">openclaw doctor --generate-gateway-token</span> → set token
+            <span class="mono">openclaw dashboard --no-open</span> -> ${t(
+              "open the Control UI",
+              "打开 Control UI",
+            )}<br />
+            <span class="mono">openclaw doctor --generate-gateway-token</span> -> ${t(
+              "set token",
+              "生成并设置 token",
+            )}
           </div>
           <div style="margin-top: 6px">
             <a
@@ -53,8 +67,8 @@ export function renderOverview(props: OverviewProps) {
               href="https://docs.openclaw.ai/web/dashboard"
               target="_blank"
               rel="noreferrer"
-              title="Control UI auth docs (opens in new tab)"
-              >Docs: Control UI auth</a
+              title=${t("Control UI auth docs (opens in new tab)", "Control UI 鉴权文档（新标签页打开）")}
+              >${t("Docs: Control UI auth", "文档：Control UI 鉴权")}</a
             >
           </div>
         </div>
@@ -62,20 +76,24 @@ export function renderOverview(props: OverviewProps) {
     }
     return html`
       <div class="muted" style="margin-top: 8px">
-        Auth failed. Update the token or password in Control UI settings, then click Connect.
+        ${t(
+          "Auth failed. Update the token or password in Control UI settings, then click Connect.",
+          "鉴权失败。请在 Control UI 设置中更新 token 或密码后再次连接。",
+        )}
         <div style="margin-top: 6px">
           <a
             class="session-link"
             href="https://docs.openclaw.ai/web/dashboard"
             target="_blank"
             rel="noreferrer"
-            title="Control UI auth docs (opens in new tab)"
-            >Docs: Control UI auth</a
+            title=${t("Control UI auth docs (opens in new tab)", "Control UI 鉴权文档（新标签页打开）")}
+            >${t("Docs: Control UI auth", "文档：Control UI 鉴权")}</a
           >
         </div>
       </div>
     `;
   })();
+
   const insecureContextHint = (() => {
     if (props.connected || !props.lastError) {
       return null;
@@ -90,11 +108,15 @@ export function renderOverview(props: OverviewProps) {
     }
     return html`
       <div class="muted" style="margin-top: 8px">
-        This page is HTTP, so the browser blocks device identity. Use HTTPS (Tailscale Serve) or open
-        <span class="mono">http://127.0.0.1:18789</span> on the gateway host.
+        ${t(
+          "This page is HTTP, so the browser blocks device identity. Use HTTPS (Tailscale Serve) or open",
+          "当前页面是 HTTP，浏览器会阻止设备身份。请使用 HTTPS（Tailscale Serve）或在网关主机打开",
+        )}
+        <span class="mono">http://127.0.0.1:18789</span>.
         <div style="margin-top: 6px">
-          If you must stay on HTTP, set
-          <span class="mono">gateway.controlUi.allowInsecureAuth: true</span> (token-only).
+          ${t("If you must stay on HTTP, set", "如果必须使用 HTTP，请设置")}
+          <span class="mono">gateway.controlUi.allowInsecureAuth: true</span>
+          ${t("(token-only).", "（仅 token）。")}
         </div>
         <div style="margin-top: 6px">
           <a
@@ -102,17 +124,17 @@ export function renderOverview(props: OverviewProps) {
             href="https://docs.openclaw.ai/gateway/tailscale"
             target="_blank"
             rel="noreferrer"
-            title="Tailscale Serve docs (opens in new tab)"
-            >Docs: Tailscale Serve</a
+            title=${t("Tailscale Serve docs (opens in new tab)", "Tailscale Serve 文档（新标签页打开）")}
+            >${t("Docs: Tailscale Serve", "文档：Tailscale Serve")}</a
           >
-          <span class="muted"> · </span>
+          <span class="muted"> / </span>
           <a
             class="session-link"
             href="https://docs.openclaw.ai/web/control-ui#insecure-http"
             target="_blank"
             rel="noreferrer"
-            title="Insecure HTTP docs (opens in new tab)"
-            >Docs: Insecure HTTP</a
+            title=${t("Insecure HTTP docs (opens in new tab)", "不安全 HTTP 文档（新标签页打开）")}
+            >${t("Docs: Insecure HTTP", "文档：不安全 HTTP")}</a
           >
         </div>
       </div>
@@ -122,11 +144,16 @@ export function renderOverview(props: OverviewProps) {
   return html`
     <section class="grid grid-cols-2">
       <div class="card">
-        <div class="card-title">Gateway Access</div>
-        <div class="card-sub">Where the dashboard connects and how it authenticates.</div>
+        <div class="card-title">${t("Gateway Access", "网关连接")}</div>
+        <div class="card-sub">
+          ${t(
+            "Where the dashboard connects and how it authenticates.",
+            "控制台连接到哪里，以及如何进行鉴权。",
+          )}
+        </div>
         <div class="form-grid" style="margin-top: 16px;">
           <label class="field">
-            <span>WebSocket URL</span>
+            <span>${t("WebSocket URL", "WebSocket 地址")}</span>
             <input
               .value=${props.settings.gatewayUrl}
               @input=${(e: Event) => {
@@ -137,7 +164,7 @@ export function renderOverview(props: OverviewProps) {
             />
           </label>
           <label class="field">
-            <span>Gateway Token</span>
+            <span>${t("Gateway Token", "网关 Token")}</span>
             <input
               .value=${props.settings.token}
               @input=${(e: Event) => {
@@ -148,7 +175,7 @@ export function renderOverview(props: OverviewProps) {
             />
           </label>
           <label class="field">
-            <span>Password (not stored)</span>
+            <span>${t("Password (not stored)", "密码（不保存）")}</span>
             <input
               type="password"
               .value=${props.password}
@@ -156,11 +183,11 @@ export function renderOverview(props: OverviewProps) {
                 const v = (e.target as HTMLInputElement).value;
                 props.onPasswordChange(v);
               }}
-              placeholder="system or shared password"
+              placeholder=${t("system or shared password", "系统密码或共享密码")}
             />
           </label>
           <label class="field">
-            <span>Default Session Key</span>
+            <span>${t("Default Session Key", "默认 Session Key")}</span>
             <input
               .value=${props.settings.sessionKey}
               @input=${(e: Event) => {
@@ -171,34 +198,38 @@ export function renderOverview(props: OverviewProps) {
           </label>
         </div>
         <div class="row" style="margin-top: 14px;">
-          <button class="btn" @click=${() => props.onConnect()}>Connect</button>
-          <button class="btn" @click=${() => props.onRefresh()}>Refresh</button>
-          <span class="muted">Click Connect to apply connection changes.</span>
+          <button class="btn" @click=${() => props.onConnect()}>${t("Connect", "连接")}</button>
+          <button class="btn" @click=${() => props.onRefresh()}>${t("Refresh", "刷新")}</button>
+          <span class="muted">${t("Click Connect to apply connection changes.", "点击“连接”以应用连接配置。")}</span>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-title">Snapshot</div>
-        <div class="card-sub">Latest gateway handshake information.</div>
+        <div class="card-title">${t("Snapshot", "快照")}</div>
+        <div class="card-sub">${t("Latest gateway handshake information.", "最近一次网关握手信息。")}</div>
         <div class="stat-grid" style="margin-top: 16px;">
           <div class="stat">
-            <div class="stat-label">Status</div>
+            <div class="stat-label">${t("Status", "状态")}</div>
             <div class="stat-value ${props.connected ? "ok" : "warn"}">
-              ${props.connected ? "Connected" : "Disconnected"}
+              ${props.connected ? t("Connected", "已连接") : t("Disconnected", "未连接")}
             </div>
           </div>
           <div class="stat">
-            <div class="stat-label">Uptime</div>
+            <div class="stat-label">${t("Uptime", "运行时长")}</div>
             <div class="stat-value">${uptime}</div>
           </div>
           <div class="stat">
-            <div class="stat-label">Tick Interval</div>
+            <div class="stat-label">${t("Tick Interval", "Tick 间隔")}</div>
             <div class="stat-value">${tick}</div>
           </div>
           <div class="stat">
-            <div class="stat-label">Last Channels Refresh</div>
+            <div class="stat-label">${t("Last Channels Refresh", "渠道上次刷新")}</div>
             <div class="stat-value">
-              ${props.lastChannelsRefresh ? formatRelativeTimestamp(props.lastChannelsRefresh) : "n/a"}
+              ${
+                props.lastChannelsRefresh
+                  ? formatRelativeTimestamp(props.lastChannelsRefresh)
+                  : naLabel
+              }
             </div>
           </div>
         </div>
@@ -211,7 +242,10 @@ export function renderOverview(props: OverviewProps) {
             </div>`
             : html`
                 <div class="callout" style="margin-top: 14px">
-                  Use Channels to link WhatsApp, Telegram, Discord, Signal, or iMessage.
+                  ${t(
+                    "Use Channels to link WhatsApp, Telegram, Discord, Signal, or iMessage.",
+                    "在“渠道”页可连接 WhatsApp、Telegram、Discord、Signal 或 iMessage。",
+                  )}
                 </div>
               `
         }
@@ -220,41 +254,52 @@ export function renderOverview(props: OverviewProps) {
 
     <section class="grid grid-cols-3" style="margin-top: 18px;">
       <div class="card stat-card">
-        <div class="stat-label">Instances</div>
+        <div class="stat-label">${t("Instances", "实例")}</div>
         <div class="stat-value">${props.presenceCount}</div>
-        <div class="muted">Presence beacons in the last 5 minutes.</div>
+        <div class="muted">${t("Presence beacons in the last 5 minutes.", "最近 5 分钟内的在线信标。")}</div>
       </div>
       <div class="card stat-card">
-        <div class="stat-label">Sessions</div>
-        <div class="stat-value">${props.sessionsCount ?? "n/a"}</div>
-        <div class="muted">Recent session keys tracked by the gateway.</div>
+        <div class="stat-label">${t("Sessions", "会话")}</div>
+        <div class="stat-value">${props.sessionsCount ?? naLabel}</div>
+        <div class="muted">${t("Recent session keys tracked by the gateway.", "网关最近追踪的会话键。")}</div>
       </div>
       <div class="card stat-card">
-        <div class="stat-label">Cron</div>
+        <div class="stat-label">${t("Cron", "定时任务")}</div>
         <div class="stat-value">
-          ${props.cronEnabled == null ? "n/a" : props.cronEnabled ? "Enabled" : "Disabled"}
+          ${
+            props.cronEnabled == null
+              ? naLabel
+              : props.cronEnabled
+                ? t("Enabled", "已启用")
+                : t("Disabled", "已禁用")
+          }
         </div>
-        <div class="muted">Next wake ${formatNextRun(props.cronNext)}</div>
+        <div class="muted">
+          ${t("Next wake", "下次唤醒")} ${formatNextRun(props.cronNext)}
+        </div>
       </div>
     </section>
 
     <section class="card" style="margin-top: 18px;">
-      <div class="card-title">Notes</div>
-      <div class="card-sub">Quick reminders for remote control setups.</div>
+      <div class="card-title">${t("Notes", "说明")}</div>
+      <div class="card-sub">${t("Quick reminders for remote control setups.", "远程控制部署的快速提示。")}</div>
       <div class="note-grid" style="margin-top: 14px;">
         <div>
-          <div class="note-title">Tailscale serve</div>
+          <div class="note-title">${t("Tailscale serve", "Tailscale Serve")}</div>
           <div class="muted">
-            Prefer serve mode to keep the gateway on loopback with tailnet auth.
+            ${t(
+              "Prefer serve mode to keep the gateway on loopback with tailnet auth.",
+              "优先使用 serve 模式，让网关只监听 loopback 并由 tailnet 鉴权。",
+            )}
           </div>
         </div>
         <div>
-          <div class="note-title">Session hygiene</div>
-          <div class="muted">Use /new or sessions.patch to reset context.</div>
+          <div class="note-title">${t("Session hygiene", "会话清理")}</div>
+          <div class="muted">${t("Use /new or sessions.patch to reset context.", "可用 /new 或 sessions.patch 重置上下文。")}</div>
         </div>
         <div>
-          <div class="note-title">Cron reminders</div>
-          <div class="muted">Use isolated sessions for recurring runs.</div>
+          <div class="note-title">${t("Cron reminders", "定时提醒")}</div>
+          <div class="muted">${t("Use isolated sessions for recurring runs.", "定时任务建议使用独立会话。")}</div>
         </div>
       </div>
     </section>

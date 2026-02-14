@@ -12,8 +12,11 @@ import {
 import { parseEnvPairs, parseTimeoutMs } from "../../cli/nodes-run.js";
 import {
   parseScreenRecordPayload,
+  parseScreenSnapshotPayload,
   screenRecordTempPath,
+  screenSnapshotTempPath,
   writeScreenRecordToFile,
+  writeScreenSnapshotToFile,
 } from "../../cli/nodes-screen.js";
 import { parseDurationMs } from "../../cli/parse-duration.js";
 import { imageMimeFromFormat } from "../../media/mime.js";
@@ -34,6 +37,7 @@ const NODES_TOOL_ACTIONS = [
   "camera_snap",
   "camera_list",
   "camera_clip",
+  "screen_snapshot",
   "screen_record",
   "location_get",
   "run",
@@ -70,7 +74,8 @@ const NodesToolSchema = Type.Object({
   duration: Type.Optional(Type.String()),
   durationMs: Type.Optional(Type.Number()),
   includeAudio: Type.Optional(Type.Boolean()),
-  // screen_record
+  // screen_snapshot / screen_record
+  screenFormat: Type.Optional(Type.String()),
   fps: Type.Optional(Type.Number()),
   screenIndex: Type.Optional(Type.Number()),
   outPath: Type.Optional(Type.String()),
@@ -310,6 +315,59 @@ export function createNodesTool(options?: {
                 hasAudio: payload.hasAudio,
               },
             };
+          }
+          case "screen_snapshot": {
+            const node = readStringParam(params, "node", { required: true });
+            const nodeId = await resolveNodeId(gatewayOpts, node);
+            const screenIndex =
+              typeof params.screenIndex === "number" && Number.isFinite(params.screenIndex)
+                ? params.screenIndex
+                : 0;
+            const formatRaw =
+              typeof params.screenFormat === "string"
+                ? params.screenFormat.trim().toLowerCase()
+                : "png";
+            const format =
+              formatRaw === "jpg"
+                ? "jpeg"
+                : formatRaw === "jpeg" || formatRaw === "png"
+                  ? formatRaw
+                  : (() => {
+                      throw new Error("invalid screenFormat (png|jpg|jpeg)");
+                    })();
+            const raw = await callGatewayTool<{ payload: unknown }>("node.invoke", gatewayOpts, {
+              nodeId,
+              command: "screen.snapshot",
+              params: {
+                format,
+                screenIndex,
+              },
+              idempotencyKey: crypto.randomUUID(),
+            });
+            const payload = parseScreenSnapshotPayload(raw?.payload);
+            const ext = payload.format === "jpeg" ? "jpg" : payload.format;
+            const filePath =
+              typeof params.outPath === "string" && params.outPath.trim()
+                ? params.outPath.trim()
+                : screenSnapshotTempPath({ ext });
+            const written = await writeScreenSnapshotToFile(filePath, payload.base64);
+            const mimeType =
+              imageMimeFromFormat(payload.format) ??
+              (payload.format === "jpeg" ? "image/jpeg" : "image/png");
+            const result: AgentToolResult<unknown> = {
+              content: [
+                { type: "text", text: `MEDIA:${written.path}` },
+                { type: "image", data: payload.base64, mimeType },
+              ],
+              details: {
+                path: written.path,
+                format: payload.format,
+                width: payload.width,
+                height: payload.height,
+                screenIndex: payload.screenIndex,
+              },
+            };
+            return await sanitizeToolResultImages(result, "nodes:screen_snapshot");
           }
           case "screen_record": {
             const node = readStringParam(params, "node", { required: true });

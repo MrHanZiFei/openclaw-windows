@@ -27,6 +27,7 @@ function createProps(overrides: Partial<CronProps> = {}): CronProps {
     error: null,
     busy: false,
     form: { ...DEFAULT_CRON_FORM },
+    editingJobId: null,
     channels: [],
     channelLabels: {},
     runsJobId: null,
@@ -34,6 +35,9 @@ function createProps(overrides: Partial<CronProps> = {}): CronProps {
     onFormChange: () => undefined,
     onRefresh: () => undefined,
     onAdd: () => undefined,
+    onEdit: () => undefined,
+    onCancelEdit: () => undefined,
+    onUpdate: () => undefined,
     onToggle: () => undefined,
     onRun: () => undefined,
     onRemove: () => undefined,
@@ -157,5 +161,67 @@ describe("cron view", () => {
     ).map((el) => (el.textContent ?? "").trim());
     expect(summaries[0]).toBe("newer run");
     expect(summaries[1]).toBe("older run");
+  });
+
+  it("invokes edit handler when clicking Edit", () => {
+    const container = document.createElement("div");
+    const onEdit = vi.fn();
+    const job = createJob("job-1");
+    render(
+      renderCron(
+        createProps({
+          jobs: [job],
+          onEdit,
+        }),
+      ),
+      container,
+    );
+
+    const editButton = Array.from(container.querySelectorAll("button")).find(
+      (btn) => btn.textContent?.trim() === "Edit",
+    );
+    expect(editButton).not.toBeUndefined();
+    editButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+
+    expect(onEdit).toHaveBeenCalledTimes(1);
+    expect(onEdit).toHaveBeenCalledWith(job);
+  });
+
+  it("switches form to edit mode and submits update", () => {
+    const container = document.createElement("div");
+    const onAdd = vi.fn();
+    const onUpdate = vi.fn();
+    const onCancelEdit = vi.fn();
+    const job = createJob("job-1");
+    render(
+      renderCron(
+        createProps({
+          jobs: [job],
+          editingJobId: "job-1",
+          onAdd,
+          onUpdate,
+          onCancelEdit,
+        }),
+      ),
+      container,
+    );
+
+    expect(container.textContent).toContain("Edit Job");
+
+    const saveButton = Array.from(container.querySelectorAll("button")).find(
+      (btn) => btn.textContent?.trim() === "Save changes",
+    );
+    expect(saveButton).not.toBeUndefined();
+    saveButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+
+    expect(onUpdate).toHaveBeenCalledWith("job-1");
+    expect(onAdd).not.toHaveBeenCalled();
+
+    const cancelButton = Array.from(container.querySelectorAll("button")).find(
+      (btn) => btn.textContent?.trim() === "Cancel",
+    );
+    expect(cancelButton).not.toBeUndefined();
+    cancelButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(onCancelEdit).toHaveBeenCalledTimes(1);
   });
 });

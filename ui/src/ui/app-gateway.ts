@@ -28,6 +28,10 @@ import { loadNodes } from "./controllers/nodes.ts";
 import { loadSessions } from "./controllers/sessions.ts";
 import { GatewayBrowserClient } from "./gateway.ts";
 
+const CHAT_HISTORY_REFRESH_DEBOUNCE_MS = 220;
+const AGENT_SESSION_TOKEN_MARKER = "?token=";
+const chatHistoryRefreshTimers = new WeakMap<GatewayHost, number>();
+
 type GatewayHost = {
   settings: UiSettings;
   password: string;
@@ -55,6 +59,67 @@ type GatewayHost = {
   execApprovalQueue: ExecApprovalRequest[];
   execApprovalError: string | null;
 };
+
+function normalizeSessionKeyForMatch(value: string | undefined): string {
+  const trimmed = (value ?? "").trim();
+  if (!trimmed) {
+    return "";
+  }
+  if (!trimmed.startsWith("agent:")) {
+    return trimmed;
+  }
+  const markerIdx = trimmed.indexOf(AGENT_SESSION_TOKEN_MARKER);
+  return markerIdx >= 0 ? trimmed.slice(0, markerIdx) : trimmed;
+}
+
+function sessionKeysMatch(current: string, incoming: string | undefined): boolean {
+  const rightRaw = (incoming ?? "").trim();
+  if (!rightRaw) {
+    return false;
+  }
+  if (current === rightRaw) {
+    return true;
+  }
+  const left = normalizeSessionKeyForMatch(current);
+  const right = normalizeSessionKeyForMatch(rightRaw);
+  return Boolean(left && right && left === right);
+}
+
+function clearScheduledChatHistoryRefresh(host: GatewayHost) {
+  const timer = chatHistoryRefreshTimers.get(host);
+  if (timer != null) {
+    window.clearTimeout(timer);
+    chatHistoryRefreshTimers.delete(host);
+  }
+}
+
+function scheduleChatHistoryRefresh(host: GatewayHost) {
+  if (!host.client || !host.connected) {
+    return;
+  }
+  if (chatHistoryRefreshTimers.has(host)) {
+    return;
+  }
+  const timer = window.setTimeout(() => {
+    chatHistoryRefreshTimers.delete(host);
+    void loadChatHistory(host as unknown as OpenClawApp);
+  }, CHAT_HISTORY_REFRESH_DEBOUNCE_MS);
+  chatHistoryRefreshTimers.set(host, timer);
+}
+
+function shouldRefreshForAgentLifecycle(payload?: AgentEventPayload): boolean {
+  if (!payload) {
+    return false;
+  }
+  if (payload.stream === "error") {
+    return true;
+  }
+  if (payload.stream !== "lifecycle") {
+    return false;
+  }
+  const phase = typeof payload.data?.phase === "string" ? payload.data.phase : "";
+  return phase === "start" || phase === "end" || phase === "error";
+}
 
 type SessionDefaultsSnapshot = {
   defaultAgentId?: string;
@@ -121,6 +186,7 @@ export function connectGateway(host: GatewayHost) {
   host.connected = false;
   host.execApprovalQueue = [];
   host.execApprovalError = null;
+  clearScheduledChatHistoryRefresh(host);
 
   host.client?.stop();
   host.client = new GatewayBrowserClient({
@@ -148,6 +214,7 @@ export function connectGateway(host: GatewayHost) {
     },
     onClose: ({ code, reason }) => {
       host.connected = false;
+      clearScheduledChatHistoryRefresh(host);
       // Code 1012 = Service Restart (expected during config saves, don't show as error)
       if (code !== 1012) {
         host.lastError = `disconnected (${code}): ${reason || "no reason"}`;
@@ -182,10 +249,15 @@ function handleGatewayEventUnsafe(host: GatewayHost, evt: GatewayEventFrame) {
     if (host.onboarding) {
       return;
     }
-    handleAgentEvent(
-      host as unknown as Parameters<typeof handleAgentEvent>[0],
-      evt.payload as AgentEventPayload | undefined,
-    );
+    const payload = evt.payload as AgentEventPayload | undefined;
+    handleAgentEvent(host as unknown as Parameters<typeof handleAgentEvent>[0], payload);
+    if (
+      shouldRefreshForAgentLifecycle(payload) &&
+      payload?.runId !== host.chatRunId &&
+      sessionKeysMatch(host.sessionKey, payload?.sessionKey)
+    ) {
+      scheduleChatHistoryRefresh(host);
+    }
     return;
   }
 
@@ -212,7 +284,11 @@ function handleGatewayEventUnsafe(host: GatewayHost, evt: GatewayEventFrame) {
       }
     }
     if (state === "final") {
-      void loadChatHistory(host as unknown as OpenClawApp);
+      clearScheduledChatHistoryRefresh(host);
+      const hasInlineMessage = payload?.message != null;
+      if (!hasInlineMessage) {
+        void loadChatHistory(host as unknown as OpenClawApp);
+      }
     }
     return;
   }

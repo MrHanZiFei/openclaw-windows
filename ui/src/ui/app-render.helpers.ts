@@ -8,10 +8,13 @@ import { refreshChat } from "./app-chat.ts";
 import { syncUrlWithSessionKey } from "./app-settings.ts";
 import { OpenClawApp } from "./app.ts";
 import { ChatState, loadChatHistory } from "./controllers/chat.ts";
+import { pickLocaleText } from "./i18n.ts";
 import { icons } from "./icons.ts";
-import { iconForTab, pathForTab, titleForTab, type Tab } from "./navigation.ts";
+import { iconForTab, pathForTab, titleForTabWithLocale, type Tab } from "./navigation.ts";
 
 export function renderTab(state: AppViewState, tab: Tab) {
+  const locale = state.settings.locale;
+  const title = titleForTabWithLocale(tab, locale);
   const href = pathForTab(tab, state.basePath);
   return html`
     <a
@@ -31,15 +34,16 @@ export function renderTab(state: AppViewState, tab: Tab) {
         event.preventDefault();
         state.setTab(tab);
       }}
-      title=${titleForTab(tab)}
+      title=${title}
     >
       <span class="nav-item__icon" aria-hidden="true">${icons[iconForTab(tab)]}</span>
-      <span class="nav-item__text">${titleForTab(tab)}</span>
+      <span class="nav-item__text">${title}</span>
     </a>
   `;
 }
 
 export function renderChatControls(state: AppViewState) {
+  const locale = state.settings.locale;
   const mainSessionKey = resolveMainSessionKey(state.hello, state.sessionsResult);
   const sessionOptions = resolveSessionOptions(
     state.sessionKey,
@@ -144,7 +148,7 @@ export function renderChatControls(state: AppViewState) {
             });
           }
         }}
-        title="Refresh chat data"
+        title=${pickLocaleText(locale, "Refresh chat data", "刷新对话数据")}
       >
         ${refreshIcon}
       </button>
@@ -164,8 +168,12 @@ export function renderChatControls(state: AppViewState) {
         aria-pressed=${showThinking}
         title=${
           disableThinkingToggle
-            ? "Disabled during onboarding"
-            : "Toggle assistant thinking/working output"
+            ? pickLocaleText(locale, "Disabled during onboarding", "引导流程期间已禁用")
+            : pickLocaleText(
+                locale,
+                "Toggle assistant thinking/working output",
+                "切换显示助手思考/执行内容",
+              )
         }
       >
         ${icons.brain}
@@ -185,8 +193,12 @@ export function renderChatControls(state: AppViewState) {
         aria-pressed=${focusActive}
         title=${
           disableFocusToggle
-            ? "Disabled during onboarding"
-            : "Toggle focus mode (hide sidebar + page header)"
+            ? pickLocaleText(locale, "Disabled during onboarding", "引导流程期间已禁用")
+            : pickLocaleText(
+                locale,
+                "Toggle focus mode (hide sidebar + page header)",
+                "切换专注模式（隐藏侧边栏和页面头）",
+              )
         }
       >
         ${focusIcon}
@@ -282,6 +294,7 @@ function resolveSessionOptions(
 const THEME_ORDER: ThemeMode[] = ["system", "light", "dark"];
 
 export function renderThemeToggle(state: AppViewState) {
+  const locale = state.settings.locale;
   const index = Math.max(0, THEME_ORDER.indexOf(state.theme));
   const applyTheme = (next: ThemeMode) => (event: MouseEvent) => {
     const element = event.currentTarget as HTMLElement;
@@ -295,14 +308,18 @@ export function renderThemeToggle(state: AppViewState) {
 
   return html`
     <div class="theme-toggle" style="--theme-index: ${index};">
-      <div class="theme-toggle__track" role="group" aria-label="Theme">
+      <div
+        class="theme-toggle__track"
+        role="group"
+        aria-label=${pickLocaleText(locale, "Theme", "主题")}
+      >
         <span class="theme-toggle__indicator"></span>
         <button
           class="theme-toggle__button ${state.theme === "system" ? "active" : ""}"
           @click=${applyTheme("system")}
           aria-pressed=${state.theme === "system"}
-          aria-label="System theme"
-          title="System"
+          aria-label=${pickLocaleText(locale, "System theme", "跟随系统主题")}
+          title=${pickLocaleText(locale, "System", "系统")}
         >
           ${renderMonitorIcon()}
         </button>
@@ -310,8 +327,8 @@ export function renderThemeToggle(state: AppViewState) {
           class="theme-toggle__button ${state.theme === "light" ? "active" : ""}"
           @click=${applyTheme("light")}
           aria-pressed=${state.theme === "light"}
-          aria-label="Light theme"
-          title="Light"
+          aria-label=${pickLocaleText(locale, "Light theme", "浅色主题")}
+          title=${pickLocaleText(locale, "Light", "浅色")}
         >
           ${renderSunIcon()}
         </button>
@@ -319,8 +336,8 @@ export function renderThemeToggle(state: AppViewState) {
           class="theme-toggle__button ${state.theme === "dark" ? "active" : ""}"
           @click=${applyTheme("dark")}
           aria-pressed=${state.theme === "dark"}
-          aria-label="Dark theme"
-          title="Dark"
+          aria-label=${pickLocaleText(locale, "Dark theme", "深色主题")}
+          title=${pickLocaleText(locale, "Dark", "深色")}
         >
           ${renderMoonIcon()}
         </button>

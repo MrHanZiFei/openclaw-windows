@@ -187,6 +187,7 @@ export type AppViewState = {
   cronStatus: CronStatus | null;
   cronError: string | null;
   cronForm: CronFormState;
+  cronEditingJobId: string | null;
   cronRunsJobId: string | null;
   cronRuns: CronRunLogEntry[];
   cronBusy: boolean;

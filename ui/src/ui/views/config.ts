@@ -1,9 +1,11 @@
 import { html, nothing } from "lit";
 import type { ConfigUiHints } from "../types.ts";
+import { pickLocaleText, type UiLocale } from "../i18n.ts";
 import { hintForPath, humanize, schemaType, type JsonSchema } from "./config-form.shared.ts";
 import { analyzeConfigSchema, renderConfigForm, SECTION_META } from "./config-form.ts";
 
 export type ConfigProps = {
+  locale: UiLocale;
   raw: string;
   originalRaw: string;
   valid: boolean | null;
@@ -278,6 +280,21 @@ const SECTIONS: Array<{ key: string; label: string }> = [
   { key: "wizard", label: "Setup Wizard" },
 ];
 
+const SECTION_LABELS_ZH_CN: Record<string, string> = {
+  env: "环境",
+  update: "更新",
+  agents: "代理",
+  auth: "鉴权",
+  channels: "渠道",
+  messages: "消息",
+  commands: "命令",
+  hooks: "Hooks",
+  skills: "技能",
+  tools: "工具",
+  gateway: "网关",
+  wizard: "引导",
+};
+
 type SubsectionEntry = {
   key: string;
   label: string;
@@ -384,7 +401,14 @@ function truncateValue(value: unknown, maxLen = 40): string {
 }
 
 export function renderConfig(props: ConfigProps) {
+  const t = (english: string, chinese: string) => pickLocaleText(props.locale, english, chinese);
   const validity = props.valid == null ? "unknown" : props.valid ? "valid" : "invalid";
+  const validityLabel =
+    validity === "valid"
+      ? t("valid", "有效")
+      : validity === "invalid"
+        ? t("invalid", "无效")
+        : t("unknown", "未知");
   const analysis = analyzeConfigSchema(props.schema);
   const formUnsafe = analysis.schema ? analysis.unsupportedPaths.length > 0 : false;
 
@@ -398,7 +422,13 @@ export function renderConfig(props: ConfigProps) {
     .filter((k) => !knownKeys.has(k))
     .map((k) => ({ key: k, label: k.charAt(0).toUpperCase() + k.slice(1) }));
 
-  const allSections = [...availableSections, ...extraSections];
+  const allSections = [...availableSections, ...extraSections].map((section) => ({
+    ...section,
+    label:
+      props.locale === "zh-CN"
+        ? (SECTION_LABELS_ZH_CN[section.key] ?? section.label)
+        : section.label,
+  }));
 
   const activeSectionSchema =
     props.activeSection && analysis.schema && schemaType(analysis.schema) === "object"
@@ -449,12 +479,12 @@ export function renderConfig(props: ConfigProps) {
       <!-- Sidebar -->
       <aside class="config-sidebar">
         <div class="config-sidebar__header">
-          <div class="config-sidebar__title">Settings</div>
+          <div class="config-sidebar__title">${t("Settings", "设置")}</div>
           <span
             class="pill pill--sm ${
               validity === "valid" ? "pill--ok" : validity === "invalid" ? "pill--danger" : ""
             }"
-            >${validity}</span
+            >${validityLabel}</span
           >
         </div>
 
@@ -473,7 +503,7 @@ export function renderConfig(props: ConfigProps) {
           <input
             type="text"
             class="config-search__input"
-            placeholder="Search settings..."
+            placeholder=${t("Search settings...", "搜索配置...")}
             .value=${props.searchQuery}
             @input=${(e: Event) => props.onSearchChange((e.target as HTMLInputElement).value)}
           />
@@ -498,7 +528,7 @@ export function renderConfig(props: ConfigProps) {
             @click=${() => props.onSectionChange(null)}
           >
             <span class="config-nav__icon">${sidebarIcons.all}</span>
-            <span class="config-nav__label">All Settings</span>
+            <span class="config-nav__label">${t("All Settings", "全部设置")}</span>
           </button>
           ${allSections.map(
             (section) => html`
@@ -523,13 +553,13 @@ export function renderConfig(props: ConfigProps) {
               ?disabled=${props.schemaLoading || !props.schema}
               @click=${() => props.onFormModeChange("form")}
             >
-              Form
+              ${t("Form", "表单")}
             </button>
             <button
               class="config-mode-toggle__btn ${props.formMode === "raw" ? "active" : ""}"
               @click=${() => props.onFormModeChange("raw")}
             >
-              Raw
+              ${t("Raw", "原始")}
             </button>
           </div>
         </div>
@@ -546,13 +576,16 @@ export function renderConfig(props: ConfigProps) {
                   <span class="config-changes-badge"
                     >${
                       props.formMode === "raw"
-                        ? "Unsaved changes"
-                        : `${diff.length} unsaved change${diff.length !== 1 ? "s" : ""}`
+                        ? t("Unsaved changes", "有未保存修改")
+                        : t(
+                            `${diff.length} unsaved change${diff.length !== 1 ? "s" : ""}`,
+                            `${diff.length} 处未保存修改`,
+                          )
                     }</span
                   >
                 `
                 : html`
-                    <span class="config-status muted">No changes</span>
+                    <span class="config-status muted">${t("No changes", "无修改")}</span>
                   `
             }
           </div>
@@ -562,28 +595,28 @@ export function renderConfig(props: ConfigProps) {
               ?disabled=${props.loading}
               @click=${props.onReload}
             >
-              ${props.loading ? "Loading…" : "Reload"}
+              ${props.loading ? t("Loading...", "加载中...") : t("Reload", "重载")}
             </button>
             <button
               class="btn btn--sm primary"
               ?disabled=${!canSave}
               @click=${props.onSave}
             >
-              ${props.saving ? "Saving…" : "Save"}
+              ${props.saving ? t("Saving...", "保存中...") : t("Save", "保存")}
             </button>
             <button
               class="btn btn--sm"
               ?disabled=${!canApply}
               @click=${props.onApply}
             >
-              ${props.applying ? "Applying…" : "Apply"}
+              ${props.applying ? t("Applying...", "应用中...") : t("Apply", "应用")}
             </button>
             <button
               class="btn btn--sm"
               ?disabled=${!canUpdate}
               @click=${props.onUpdate}
             >
-              ${props.updating ? "Updating…" : "Update"}
+              ${props.updating ? t("Updating...", "更新中...") : t("Update", "更新")}
             </button>
           </div>
         </div>
@@ -595,8 +628,10 @@ export function renderConfig(props: ConfigProps) {
               <details class="config-diff">
                 <summary class="config-diff__summary">
                   <span
-                    >View ${diff.length} pending
-                    change${diff.length !== 1 ? "s" : ""}</span
+                    >${t(
+                      `View ${diff.length} pending change${diff.length !== 1 ? "s" : ""}`,
+                      `查看 ${diff.length} 处待提交修改`,
+                    )}</span
                   >
                   <svg
                     class="config-diff__chevron"
@@ -661,7 +696,7 @@ export function renderConfig(props: ConfigProps) {
                   class="config-subnav__item ${effectiveSubsection === null ? "active" : ""}"
                   @click=${() => props.onSubsectionChange(ALL_SUBSECTION)}
                 >
-                  All
+                  ${t("All", "全部")}
                 </button>
                 ${subsections.map(
                   (entry) => html`
@@ -691,7 +726,7 @@ export function renderConfig(props: ConfigProps) {
                     ? html`
                         <div class="config-loading">
                           <div class="config-loading__spinner"></div>
-                          <span>Loading schema…</span>
+                          <span>${t("Loading schema...", "正在加载 schema...")}</span>
                         </div>
                       `
                     : renderConfigForm({
@@ -710,7 +745,10 @@ export function renderConfig(props: ConfigProps) {
                   formUnsafe
                     ? html`
                         <div class="callout danger" style="margin-top: 12px">
-                          Form view can't safely edit some fields. Use Raw to avoid losing config entries.
+                          ${t(
+                            "Form view can't safely edit some fields. Use Raw to avoid losing config entries.",
+                            "表单视图无法安全编辑部分字段。请使用原始模式，避免配置项丢失。",
+                          )}
                         </div>
                       `
                     : nothing
@@ -718,7 +756,7 @@ export function renderConfig(props: ConfigProps) {
               `
               : html`
                 <label class="field config-raw-field">
-                  <span>Raw JSON5</span>
+                  <span>${t("Raw JSON5", "原始 JSON5")}</span>
                   <textarea
                     .value=${props.raw}
                     @input=${(e: Event) =>

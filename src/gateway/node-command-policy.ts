@@ -15,6 +15,7 @@ const CANVAS_COMMANDS = [
 const CAMERA_COMMANDS = ["camera.list"];
 const CAMERA_DANGEROUS_COMMANDS = ["camera.snap", "camera.clip"];
 
+const SCREEN_COMMANDS = ["screen.snapshot"];
 const SCREEN_DANGEROUS_COMMANDS = ["screen.record"];
 
 const LOCATION_COMMANDS = ["location.get"];
@@ -93,11 +94,18 @@ const PLATFORM_DEFAULTS: Record<string, string[]> = {
     ...REMINDERS_COMMANDS,
     ...PHOTOS_COMMANDS,
     ...MOTION_COMMANDS,
+    ...SCREEN_COMMANDS,
     ...SYSTEM_COMMANDS,
   ],
-  linux: [...SYSTEM_COMMANDS],
-  windows: [...SYSTEM_COMMANDS],
-  unknown: [...CANVAS_COMMANDS, ...CAMERA_COMMANDS, ...LOCATION_COMMANDS, ...SYSTEM_COMMANDS],
+  linux: [...SCREEN_COMMANDS, ...SYSTEM_COMMANDS],
+  windows: [...SCREEN_COMMANDS, ...SYSTEM_COMMANDS],
+  unknown: [
+    ...CANVAS_COMMANDS,
+    ...CAMERA_COMMANDS,
+    ...LOCATION_COMMANDS,
+    ...SCREEN_COMMANDS,
+    ...SYSTEM_COMMANDS,
+  ],
 };
 
 function normalizePlatformId(platform?: string, deviceFamily?: string): string {

@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import fsPromises from "node:fs/promises";
+import * as os from "node:os";
 import path from "node:path";
 import { resolveAgentConfig } from "../agents/agent-scope.js";
 import { resolveBrowserConfig } from "../browser/config.js";
@@ -81,6 +82,11 @@ type BrowserProxyParams = {
   body?: unknown;
   timeoutMs?: number;
   profile?: string;
+};
+
+type ScreenSnapshotParams = {
+  format?: string | null;
+  screenIndex?: number | null;
 };
 
 type BrowserProxyFile = {
@@ -458,6 +464,114 @@ async function runCommand(
   });
 }
 
+function normalizeScreenSnapshotFormat(raw?: string | null): "png" | "jpeg" {
+  const normalized = raw?.trim().toLowerCase() ?? "";
+  if (!normalized || normalized === "png") {
+    return "png";
+  }
+  if (normalized === "jpg" || normalized === "jpeg") {
+    return "jpeg";
+  }
+  throw new Error("INVALID_REQUEST: format must be png|jpg|jpeg");
+}
+
+function quotePowerShellSingleQuoted(value: string): string {
+  return `'${value.replace(/'/g, "''")}'`;
+}
+
+function summarizeCommandFailure(result: RunResult): string {
+  const parts = [result.error, result.stderr.trim(), result.stdout.trim()].filter(Boolean);
+  if (parts.length > 0) {
+    return parts.join(" | ");
+  }
+  return `exitCode=${result.exitCode ?? "unknown"}`;
+}
+
+async function runPowerShellScript(script: string, timeoutMs = 20_000): Promise<void> {
+  const candidates = ["pwsh", "powershell"];
+  let lastFailure = "PowerShell is not available";
+  for (const bin of candidates) {
+    const result = await runCommand(
+      [bin, "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", script],
+      undefined,
+      undefined,
+      timeoutMs,
+    );
+    if (result.success) {
+      return;
+    }
+    const summary = summarizeCommandFailure(result);
+    if (summary.includes("ENOENT")) {
+      lastFailure = `${bin} not found`;
+      continue;
+    }
+    lastFailure = `${bin}: ${summary}`;
+  }
+  throw new Error(`UNAVAILABLE: ${lastFailure}`);
+}
+
+async function captureScreenSnapshot(params: ScreenSnapshotParams) {
+  if (process.platform !== "win32") {
+    throw new Error("UNAVAILABLE: screen.snapshot is currently supported on Windows node hosts");
+  }
+  const format = normalizeScreenSnapshotFormat(params.format);
+  const screenIndex =
+    typeof params.screenIndex === "number" && Number.isFinite(params.screenIndex)
+      ? Math.trunc(params.screenIndex)
+      : 0;
+  if (screenIndex !== 0) {
+    throw new Error("INVALID_REQUEST: only screenIndex=0 is currently supported");
+  }
+
+  const tmpDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), "openclaw-screen-snapshot-"));
+  const ext = format === "jpeg" ? "jpg" : "png";
+  const filePath = path.join(tmpDir, `snapshot.${ext}`);
+  const imageFormatExpr =
+    format === "jpeg"
+      ? "[System.Drawing.Imaging.ImageFormat]::Jpeg"
+      : "[System.Drawing.Imaging.ImageFormat]::Png";
+  const script = [
+    "$ErrorActionPreference='Stop'",
+    "Add-Type -AssemblyName System.Windows.Forms",
+    "Add-Type -AssemblyName System.Drawing",
+    "$bounds=[System.Windows.Forms.SystemInformation]::VirtualScreen",
+    "$bitmap=New-Object System.Drawing.Bitmap $bounds.Width, $bounds.Height",
+    "$graphics=[System.Drawing.Graphics]::FromImage($bitmap)",
+    "$graphics.CopyFromScreen($bounds.Left, $bounds.Top, 0, 0, $bitmap.Size)",
+    `$bitmap.Save(${quotePowerShellSingleQuoted(filePath)}, ${imageFormatExpr})`,
+    "$graphics.Dispose()",
+    "$bitmap.Dispose()",
+  ].join("; ");
+
+  try {
+    try {
+      await runPowerShellScript(script, 25_000);
+    } catch (err) {
+      const message = String(err);
+      if (message.includes("CopyFromScreen")) {
+        throw new Error(
+          [
+            message,
+            "Hint: Windows screen capture requires an interactive desktop session. If you're running the node as a Scheduled Task, ensure it runs as your user (not SYSTEM) and in interactive mode.",
+            "Try: openclaw node install --force (then openclaw node restart).",
+          ].join("\n"),
+          { cause: err },
+        );
+      }
+      throw err;
+    }
+    const screenshot = await fsPromises.readFile(filePath);
+    return {
+      format,
+      base64: screenshot.toString("base64"),
+      screenIndex,
+    };
+  } finally {
+    await fsPromises.unlink(filePath).catch(() => {});
+    await fsPromises.rm(tmpDir, { recursive: true, force: true }).catch(() => {});
+  }
+}
+
 function resolveEnvPath(env?: Record<string, string>): string[] {
   const raw =
     env?.PATH ??
@@ -585,12 +699,13 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
     mode: GATEWAY_CLIENT_MODES.NODE,
     role: "node",
     scopes: [],
-    caps: ["system", ...(browserProxyEnabled ? ["browser"] : [])],
+    caps: ["system", "screen", ...(browserProxyEnabled ? ["browser"] : [])],
     commands: [
       "system.run",
       "system.which",
       "system.execApprovals.get",
       "system.execApprovals.set",
+      "screen.snapshot",
       ...(browserProxyEnabled ? ["browser.proxy"] : []),
     ],
     pathEnv,
@@ -718,6 +833,25 @@ async function handleInvoke(
       await sendInvokeResult(client, frame, {
         ok: false,
         error: { code: "INVALID_REQUEST", message: String(err) },
+      });
+    }
+    return;
+  }
+
+  if (command === "screen.snapshot") {
+    try {
+      const params = frame.paramsJSON ? decodeParams<ScreenSnapshotParams>(frame.paramsJSON) : {};
+      const payload = await captureScreenSnapshot(params);
+      await sendInvokeResult(client, frame, {
+        ok: true,
+        payloadJSON: JSON.stringify(payload),
+      });
+    } catch (err) {
+      const message = String(err);
+      const code = message.includes("UNAVAILABLE:") ? "UNAVAILABLE" : "INVALID_REQUEST";
+      await sendInvokeResult(client, frame, {
+        ok: false,
+        error: { code, message },
       });
     }
     return;

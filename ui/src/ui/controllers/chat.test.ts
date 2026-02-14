@@ -36,6 +36,38 @@ describe("handleChatEvent", () => {
     expect(handleChatEvent(state, payload)).toBe(null);
   });
 
+  it("accepts chat events when only ?token differs in agent session keys", () => {
+    const state = createState({
+      sessionKey: "agent:main:feishu:direct:ou_123?token=abc",
+      chatRunId: "run-1",
+      chatStream: "Reply",
+      chatStreamStartedAt: 100,
+    });
+    const payload: ChatEventPayload = {
+      runId: "run-1",
+      sessionKey: "agent:main:feishu:direct:ou_123",
+      state: "final",
+    };
+    expect(handleChatEvent(state, payload)).toBe("final");
+    expect(state.chatRunId).toBe(null);
+  });
+
+  it("accepts chat events when payload includes ?token but state key does not", () => {
+    const state = createState({
+      sessionKey: "agent:main:feishu:direct:ou_123",
+      chatRunId: "run-2",
+      chatStream: "Reply",
+      chatStreamStartedAt: 200,
+    });
+    const payload: ChatEventPayload = {
+      runId: "run-2",
+      sessionKey: "agent:main:feishu:direct:ou_123?token=xyz",
+      state: "final",
+    };
+    expect(handleChatEvent(state, payload)).toBe("final");
+    expect(state.chatRunId).toBe(null);
+  });
+
   it("returns null for delta from another run", () => {
     const state = createState({
       sessionKey: "main",
@@ -70,6 +102,8 @@ describe("handleChatEvent", () => {
       },
     };
     expect(handleChatEvent(state, payload)).toBe("final");
+    expect(state.chatMessages).toHaveLength(1);
+    expect((state.chatMessages[0] as { role: string }).role).toBe("assistant");
     expect(state.chatRunId).toBe("run-user");
     expect(state.chatStream).toBe("Working...");
     expect(state.chatStreamStartedAt).toBe(123);
@@ -86,10 +120,35 @@ describe("handleChatEvent", () => {
       runId: "run-1",
       sessionKey: "main",
       state: "final",
+      message: {
+        role: "assistant",
+        content: [{ type: "text", text: "Done" }],
+      },
     };
     expect(handleChatEvent(state, payload)).toBe("final");
+    expect(state.chatMessages).toHaveLength(1);
+    expect((state.chatMessages[0] as { role: string }).role).toBe("assistant");
     expect(state.chatRunId).toBe(null);
     expect(state.chatStream).toBe(null);
     expect(state.chatStreamStartedAt).toBe(null);
+  });
+
+  it("deduplicates repeated final events from the same run", () => {
+    const state = createState({
+      sessionKey: "main",
+      chatRunId: "run-1",
+    });
+    const payload: ChatEventPayload = {
+      runId: "run-1",
+      sessionKey: "main",
+      state: "final",
+      message: {
+        role: "assistant",
+        content: [{ type: "text", text: "Done" }],
+      },
+    };
+    expect(handleChatEvent(state, payload)).toBe("final");
+    expect(handleChatEvent(state, payload)).toBe("final");
+    expect(state.chatMessages).toHaveLength(1);
   });
 });

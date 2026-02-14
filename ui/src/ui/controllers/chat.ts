@@ -27,6 +27,96 @@ export type ChatEventPayload = {
   errorMessage?: string;
 };
 
+const AGENT_SESSION_TOKEN_MARKER = "?token=";
+const CHAT_EVENT_MESSAGE_LIMIT = 400;
+const CHAT_EVENT_RUN_ID_FIELD = "__openclawRunId";
+
+function normalizeSessionKeyForMatch(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return "";
+  }
+  if (!trimmed.startsWith("agent:")) {
+    return trimmed;
+  }
+  const markerIdx = trimmed.indexOf(AGENT_SESSION_TOKEN_MARKER);
+  return markerIdx >= 0 ? trimmed.slice(0, markerIdx) : trimmed;
+}
+
+function sessionKeysMatch(current: string, incoming: string): boolean {
+  if (current === incoming) {
+    return true;
+  }
+  const left = normalizeSessionKeyForMatch(current);
+  const right = normalizeSessionKeyForMatch(incoming);
+  return Boolean(left && right && left === right);
+}
+
+function normalizeMessageForAppend(message: unknown): Record<string, unknown> | null {
+  if (typeof message === "string") {
+    return {
+      role: "assistant",
+      content: [{ type: "text", text: message }],
+      timestamp: Date.now(),
+    };
+  }
+  if (!message || typeof message !== "object") {
+    return null;
+  }
+  const raw = message as Record<string, unknown>;
+  const next: Record<string, unknown> = { ...raw };
+  if (typeof next.role !== "string") {
+    next.role = "assistant";
+  }
+  if (typeof next.timestamp !== "number") {
+    next.timestamp = Date.now();
+  }
+  return next;
+}
+
+function messageIdentityKey(message: Record<string, unknown>): string {
+  const runId = message[CHAT_EVENT_RUN_ID_FIELD];
+  if (typeof runId === "string" && runId) {
+    return `run:${runId}`;
+  }
+  const id = typeof message.id === "string" ? message.id : "";
+  if (id) {
+    return `id:${id}`;
+  }
+  const messageId = typeof message.messageId === "string" ? message.messageId : "";
+  if (messageId) {
+    return `messageId:${messageId}`;
+  }
+  const role = typeof message.role === "string" ? message.role : "assistant";
+  const timestamp = typeof message.timestamp === "number" ? message.timestamp : 0;
+  const text = extractText(message) ?? "";
+  return `fallback:${role}:${timestamp}:${text}`;
+}
+
+function appendFinalMessageFromEvent(state: ChatState, payload: ChatEventPayload): boolean {
+  const normalized = normalizeMessageForAppend(payload.message);
+  if (!normalized) {
+    return false;
+  }
+  normalized[CHAT_EVENT_RUN_ID_FIELD] = payload.runId;
+  const key = messageIdentityKey(normalized);
+  const history = Array.isArray(state.chatMessages) ? state.chatMessages : [];
+  const tail = history.slice(-24);
+  const exists = tail.some((entry) => {
+    if (!entry || typeof entry !== "object") {
+      return false;
+    }
+    return messageIdentityKey(entry as Record<string, unknown>) === key;
+  });
+  if (exists) {
+    return true;
+  }
+  const merged = [...history, normalized];
+  state.chatMessages =
+    merged.length > CHAT_EVENT_MESSAGE_LIMIT ? merged.slice(-CHAT_EVENT_MESSAGE_LIMIT) : merged;
+  return true;
+}
+
 export async function loadChatHistory(state: ChatState) {
   if (!state.client || !state.connected) {
     return;
@@ -172,14 +262,16 @@ export function handleChatEvent(state: ChatState, payload?: ChatEventPayload) {
   if (!payload) {
     return null;
   }
-  if (payload.sessionKey !== state.sessionKey) {
+  if (!sessionKeysMatch(state.sessionKey, payload.sessionKey)) {
     return null;
   }
 
-  // Final from another run (e.g. sub-agent announce): refresh history to show new message.
+  // Final from another run (e.g. sub-agent announce): append inline message and
+  // let caller decide whether history reload is still needed as a fallback.
   // See https://github.com/openclaw/openclaw/issues/1909
   if (payload.runId && state.chatRunId && payload.runId !== state.chatRunId) {
     if (payload.state === "final") {
+      appendFinalMessageFromEvent(state, payload);
       return "final";
     }
     return null;
@@ -194,6 +286,7 @@ export function handleChatEvent(state: ChatState, payload?: ChatEventPayload) {
       }
     }
   } else if (payload.state === "final") {
+    appendFinalMessageFromEvent(state, payload);
     state.chatStream = null;
     state.chatRunId = null;
     state.chatStreamStartedAt = null;

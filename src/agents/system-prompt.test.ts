@@ -250,6 +250,7 @@ describe("buildAgentSystemPrompt", () => {
     expect(prompt).toContain("## OpenClaw Self-Update");
     expect(prompt).toContain("config.apply");
     expect(prompt).toContain("update.run");
+    expect(prompt).toContain("usage.sessions");
   });
 
   it("includes skills guidance when skills prompt is present", () => {

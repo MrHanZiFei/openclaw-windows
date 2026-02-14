@@ -113,4 +113,62 @@ describe("transcribeOpenAiCompatibleAudio", () => {
       }
     }
   });
+
+  it("uses chat/completions for qwen3-asr models", async () => {
+    let seenUrl: string | null = null;
+    let seenInit: RequestInit | undefined;
+    const fetchFn = async (input: RequestInfo | URL, init?: RequestInit) => {
+      seenUrl = resolveRequestUrl(input);
+      seenInit = init;
+      return new Response(
+        JSON.stringify({
+          choices: [{ message: { content: "transcribed by qwen" } }],
+        }),
+        {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        },
+      );
+    };
+
+    const result = await transcribeOpenAiCompatibleAudio({
+      buffer: Buffer.from("audio-bytes"),
+      fileName: "voice.ogg",
+      apiKey: "test-key",
+      timeoutMs: 4321,
+      baseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      model: "qwen3-asr-flash",
+      language: "zh",
+      prompt: "Transcribe this audio.",
+      mime: "audio/ogg",
+      fetchFn,
+    });
+
+    expect(result.model).toBe("qwen3-asr-flash");
+    expect(result.text).toBe("transcribed by qwen");
+    expect(seenUrl).toBe("https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions");
+    expect(seenInit?.method).toBe("POST");
+    expect(seenInit?.signal).toBeInstanceOf(AbortSignal);
+
+    const headers = new Headers(seenInit?.headers);
+    expect(headers.get("authorization")).toBe("Bearer test-key");
+    expect(headers.get("content-type")).toBe("application/json");
+
+    if (typeof seenInit?.body !== "string") {
+      throw new Error(`expected fetch body to be a string, got ${typeof seenInit?.body}`);
+    }
+    const body = JSON.parse(seenInit.body) as {
+      model?: string;
+      messages?: Array<{
+        content?: Array<{ type?: string; text?: string; input_audio?: { data?: string } }>;
+      }>;
+      extra_body?: { asr_options?: { language?: string } };
+    };
+    expect(body.model).toBe("qwen3-asr-flash");
+    expect(body.extra_body?.asr_options?.language).toBe("zh");
+    const parts = body.messages?.[0]?.content ?? [];
+    expect(parts.find((part) => part.type === "text")).toBeUndefined();
+    const inputAudio = parts.find((part) => part.type === "input_audio");
+    expect(inputAudio?.input_audio?.data?.startsWith("data:audio/ogg;base64,")).toBe(true);
+  });
 });

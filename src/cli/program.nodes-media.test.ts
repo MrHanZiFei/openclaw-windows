@@ -430,6 +430,66 @@ describe("cli program (nodes media)", () => {
     }
   });
 
+  it("runs nodes screen snapshot and prints MEDIA path", async () => {
+    callGateway.mockImplementation(async (opts: { method?: string }) => {
+      if (opts.method === "node.list") {
+        return {
+          ts: Date.now(),
+          nodes: [
+            {
+              nodeId: "windows-node",
+              displayName: "Windows Node",
+              remoteIp: "192.168.0.99",
+              connected: true,
+            },
+          ],
+        };
+      }
+      if (opts.method === "node.invoke") {
+        return {
+          ok: true,
+          nodeId: "windows-node",
+          command: "screen.snapshot",
+          payload: { format: "png", base64: "aGk=", width: 1280, height: 720, screenIndex: 0 },
+        };
+      }
+      return { ok: true };
+    });
+
+    const program = buildProgram();
+    runtime.log.mockClear();
+    await program.parseAsync(
+      ["nodes", "screen", "snapshot", "--node", "windows-node", "--format", "png"],
+      { from: "user" },
+    );
+
+    expect(callGateway).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: "node.invoke",
+        params: expect.objectContaining({
+          nodeId: "windows-node",
+          command: "screen.snapshot",
+          timeoutMs: 20_000,
+          idempotencyKey: "idem-test",
+          params: expect.objectContaining({
+            format: "png",
+            screenIndex: 0,
+          }),
+        }),
+      }),
+    );
+
+    const out = String(runtime.log.mock.calls[0]?.[0] ?? "");
+    const mediaPath = out.replace(/^MEDIA:/, "").trim();
+    expect(mediaPath).toMatch(/openclaw-screen-snapshot-.*\.png$/);
+
+    try {
+      await expect(fs.readFile(mediaPath, "utf8")).resolves.toBe("hi");
+    } finally {
+      await fs.unlink(mediaPath).catch(() => {});
+    }
+  });
+
   it("fails nodes camera snap on invalid facing", async () => {
     callGateway.mockImplementation(async (opts: { method?: string }) => {
       if (opts.method === "node.list") {

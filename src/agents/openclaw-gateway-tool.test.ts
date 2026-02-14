@@ -162,4 +162,64 @@ describe("gateway tool", () => {
       expect(params).toMatchObject({ timeoutMs: 20 * 60_000 });
     }
   });
+
+  it("passes usage.sessions through gateway call with derived date range", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-02-13T15:04:05Z"));
+
+    try {
+      const { callGatewayTool } = await import("./tools/gateway.js");
+      const tool = createOpenClawTools({
+        agentSessionKey: "agent:main:whatsapp:dm:+15555550123",
+      }).find((candidate) => candidate.name === "gateway");
+      expect(tool).toBeDefined();
+      if (!tool) {
+        throw new Error("missing gateway tool");
+      }
+
+      await tool.execute("call5", {
+        action: "usage.sessions",
+        days: 1,
+        limit: 25,
+      });
+
+      expect(callGatewayTool).toHaveBeenCalledWith(
+        "sessions.usage",
+        expect.any(Object),
+        expect.objectContaining({
+          startDate: "2026-02-13",
+          endDate: "2026-02-13",
+          limit: 25,
+        }),
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("passes usage.cost through gateway call with explicit date range", async () => {
+    const { callGatewayTool } = await import("./tools/gateway.js");
+    const tool = createOpenClawTools({
+      agentSessionKey: "agent:main:whatsapp:dm:+15555550123",
+    }).find((candidate) => candidate.name === "gateway");
+    expect(tool).toBeDefined();
+    if (!tool) {
+      throw new Error("missing gateway tool");
+    }
+
+    await tool.execute("call6", {
+      action: "usage.cost",
+      startDate: "2026-02-01",
+      endDate: "2026-02-13",
+    });
+
+    expect(callGatewayTool).toHaveBeenCalledWith(
+      "usage.cost",
+      expect.any(Object),
+      expect.objectContaining({
+        startDate: "2026-02-01",
+        endDate: "2026-02-13",
+      }),
+    );
+  });
 });

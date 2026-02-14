@@ -6,6 +6,8 @@ import {
   normalizeBasePath,
   normalizePath,
   pathForTab,
+  titleForTabWithLocale,
+  subtitleForTabWithLocale,
   subtitleForTab,
   tabFromPath,
   titleForTab,
@@ -60,6 +62,11 @@ describe("titleForTab", () => {
     expect(titleForTab("overview")).toBe("Overview");
     expect(titleForTab("cron")).toBe("Cron Jobs");
   });
+
+  it("supports Chinese titles", () => {
+    expect(titleForTabWithLocale("chat", "zh-CN")).toBe("对话");
+    expect(titleForTabWithLocale("config", "zh-CN")).toBe("配置");
+  });
 });
 
 describe("subtitleForTab", () => {
@@ -73,6 +80,11 @@ describe("subtitleForTab", () => {
   it("returns descriptive subtitles", () => {
     expect(subtitleForTab("chat")).toContain("chat session");
     expect(subtitleForTab("config")).toContain("openclaw.json");
+  });
+
+  it("supports Chinese subtitles", () => {
+    expect(subtitleForTabWithLocale("chat", "zh-CN")).toContain("网关直接对话");
+    expect(subtitleForTabWithLocale("config", "zh-CN")).toContain("openclaw.json");
   });
 });
 
