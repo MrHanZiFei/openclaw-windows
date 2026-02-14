@@ -20,9 +20,9 @@ describe("resolveCronStorePath", () => {
     vi.unstubAllEnvs();
   });
 
-  it("uses OPENCLAW_HOME for tilde expansion", () => {
-    vi.stubEnv("OPENCLAW_HOME", "/srv/openclaw-home");
-    vi.stubEnv("HOME", "/home/other");
+  it("uses HOME for tilde expansion", () => {
+    vi.stubEnv("HOME", "/srv/openclaw-home");
+    vi.stubEnv("USERPROFILE", "/home/other");
 
     const result = resolveCronStorePath("~/cron/jobs.json");
     expect(result).toBe(path.resolve("/srv/openclaw-home", "cron", "jobs.json"));

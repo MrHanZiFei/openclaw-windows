@@ -7,9 +7,9 @@ describe("resolveStorePath", () => {
     vi.unstubAllEnvs();
   });
 
-  it("uses OPENCLAW_HOME for tilde expansion", () => {
-    vi.stubEnv("OPENCLAW_HOME", "/srv/openclaw-home");
-    vi.stubEnv("HOME", "/home/other");
+  it("uses HOME for tilde expansion", () => {
+    vi.stubEnv("HOME", "/srv/openclaw-home");
+    vi.stubEnv("USERPROFILE", "/home/other");
 
     const resolved = resolveStorePath("~/.openclaw/agents/{agentId}/sessions/sessions.json", {
       agentId: "research",

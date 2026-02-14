@@ -337,10 +337,6 @@ function resolveHomeDisplayPrefix(): { home: string; prefix: string } | undefine
   if (!home) {
     return undefined;
   }
-  const explicitHome = process.env.OPENCLAW_HOME?.trim();
-  if (explicitHome) {
-    return { home, prefix: "$OPENCLAW_HOME" };
-  }
   return { home, prefix: "~" };
 }
 

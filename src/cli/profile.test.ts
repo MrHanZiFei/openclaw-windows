@@ -83,10 +83,10 @@ describe("applyCliProfileEnv", () => {
     expect(env.OPENCLAW_CONFIG_PATH).toBe(path.join("/custom", "openclaw.json"));
   });
 
-  it("uses OPENCLAW_HOME when deriving profile state dir", () => {
+  it("uses HOME when deriving profile state dir", () => {
     const env: Record<string, string | undefined> = {
-      OPENCLAW_HOME: "/srv/openclaw-home",
-      HOME: "/home/other",
+      HOME: "/srv/openclaw-home",
+      USERPROFILE: "/home/other",
     };
     applyCliProfileEnv({
       profile: "work",
