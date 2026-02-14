@@ -1,6 +1,6 @@
-import type { GatewayBrowserClient } from "../gateway.ts";
 import type { ChatAttachment } from "../ui-types.ts";
 import { extractText } from "../chat/message-extract.ts";
+import { GatewayRequestTimeoutError, type GatewayBrowserClient } from "../gateway.ts";
 import { generateUUID } from "../uuid.ts";
 
 export type ChatState = {
@@ -130,6 +130,7 @@ export async function loadChatHistory(state: ChatState) {
         sessionKey: state.sessionKey,
         limit: 200,
       },
+      { timeoutMs: 12000 },
     );
     state.chatMessages = Array.isArray(res.messages) ? res.messages : [];
     state.chatThinkingLevel = res.thinkingLevel ?? null;
@@ -213,15 +214,26 @@ export async function sendChatMessage(
     : undefined;
 
   try {
-    await state.client.request("chat.send", {
-      sessionKey: state.sessionKey,
-      message: msg,
-      deliver: false,
-      idempotencyKey: runId,
-      attachments: apiAttachments,
-    });
+    await state.client.request(
+      "chat.send",
+      {
+        sessionKey: state.sessionKey,
+        message: msg,
+        deliver: false,
+        idempotencyKey: runId,
+        attachments: apiAttachments,
+      },
+      {
+        // chat.send should ACK quickly; if it doesn't, we keep the UI "run" open
+        // and wait for chat events (delta/final) rather than freezing the UI forever.
+        timeoutMs: 8000,
+      },
+    );
     return runId;
   } catch (err) {
+    if (err instanceof GatewayRequestTimeoutError) {
+      return runId;
+    }
     const error = String(err);
     state.chatRunId = null;
     state.chatStream = null;
@@ -250,6 +262,7 @@ export async function abortChatRun(state: ChatState): Promise<boolean> {
     await state.client.request(
       "chat.abort",
       runId ? { sessionKey: state.sessionKey, runId } : { sessionKey: state.sessionKey },
+      { timeoutMs: 8000 },
     );
     return true;
   } catch (err) {

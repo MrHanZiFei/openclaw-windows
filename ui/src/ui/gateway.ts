@@ -42,6 +42,7 @@ export type GatewayHelloOk = {
 type Pending = {
   resolve: (value: unknown) => void;
   reject: (err: unknown) => void;
+  timeoutTimer: number | null;
 };
 
 export type GatewayBrowserClientOptions = {
@@ -61,6 +62,17 @@ export type GatewayBrowserClientOptions = {
 
 // 4008 = application-defined code (browser rejects 1008 "Policy Violation")
 const CONNECT_FAILED_CLOSE_CODE = 4008;
+
+export class GatewayRequestTimeoutError extends Error {
+  constructor(
+    public readonly method: string,
+    public readonly timeoutMs: number,
+    message?: string,
+  ) {
+    super(message ?? `gateway request timed out: ${method} (${timeoutMs}ms)`);
+    this.name = "GatewayRequestTimeoutError";
+  }
+}
 
 export class GatewayBrowserClient {
   private ws: WebSocket | null = null;
@@ -120,6 +132,9 @@ export class GatewayBrowserClient {
 
   private flushPending(err: Error) {
     for (const [, p] of this.pending) {
+      if (p.timeoutTimer != null) {
+        window.clearTimeout(p.timeoutTimer);
+      }
       p.reject(err);
     }
     this.pending.clear();
@@ -277,6 +292,9 @@ export class GatewayBrowserClient {
         return;
       }
       this.pending.delete(res.id);
+      if (pending.timeoutTimer != null) {
+        window.clearTimeout(pending.timeoutTimer);
+      }
       if (res.ok) {
         pending.resolve(res.payload);
       } else {
@@ -286,14 +304,32 @@ export class GatewayBrowserClient {
     }
   }
 
-  request<T = unknown>(method: string, params?: unknown): Promise<T> {
+  request<T = unknown>(
+    method: string,
+    params?: unknown,
+    opts?: { timeoutMs?: number; timeoutMessage?: string },
+  ): Promise<T> {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
       return Promise.reject(new Error("gateway not connected"));
     }
     const id = generateUUID();
     const frame = { type: "req", id, method, params };
     const p = new Promise<T>((resolve, reject) => {
-      this.pending.set(id, { resolve: (v) => resolve(v as T), reject });
+      const timeoutMs = typeof opts?.timeoutMs === "number" ? opts.timeoutMs : null;
+      const timeoutTimer =
+        timeoutMs && timeoutMs > 0
+          ? window.setTimeout(() => {
+              const pending = this.pending.get(id);
+              if (!pending) {
+                return;
+              }
+              this.pending.delete(id);
+              pending.reject(
+                new GatewayRequestTimeoutError(method, timeoutMs, opts?.timeoutMessage),
+              );
+            }, timeoutMs)
+          : null;
+      this.pending.set(id, { resolve: (v) => resolve(v as T), reject, timeoutTimer });
     });
     this.ws.send(JSON.stringify(frame));
     return p;

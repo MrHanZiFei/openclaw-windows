@@ -1,8 +1,9 @@
 import { html, nothing } from "lit";
 import type { AppViewState } from "./app-view-state.ts";
+import type { OpenClawApp } from "./app.ts";
 import type { UsageState } from "./controllers/usage.ts";
 import { parseAgentSessionKey } from "../../../src/routing/session-key.js";
-import { refreshChatAvatar } from "./app-chat.ts";
+import { refreshChat, refreshChatAvatar } from "./app-chat.ts";
 import { renderChatControls, renderTab, renderThemeToggle } from "./app-render.helpers.ts";
 import { loadAgentFileContent, loadAgentFiles, saveAgentFile } from "./controllers/agent-files.ts";
 import { loadAgentIdentities, loadAgentIdentity } from "./controllers/agent-identity.ts";
@@ -1165,8 +1166,20 @@ export function renderApp(state: AppViewState) {
                 sessions: state.sessionsResult,
                 focusMode: chatFocus,
                 onRefresh: () => {
+                  const app = state as unknown as OpenClawApp;
+                  app.chatManualRefreshInFlight = true;
+                  app.chatNewMessagesBelow = false;
                   state.resetToolStream();
-                  return Promise.all([loadChatHistory(state), refreshChatAvatar(state)]);
+                  return refreshChat(state, { scheduleScroll: false })
+                    .then(() => {
+                      app.scrollToBottom({ smooth: true });
+                    })
+                    .finally(() => {
+                      requestAnimationFrame(() => {
+                        app.chatManualRefreshInFlight = false;
+                        app.chatNewMessagesBelow = false;
+                      });
+                    });
                 },
                 onToggleFocusMode: () => {
                   if (state.onboarding) {

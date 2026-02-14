@@ -1298,6 +1298,27 @@
   height: 12px;
 }
 
+.chat-reading-indicator__meta {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.chat-reading-indicator__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chat-reading-indicator__actions .btn.btn--sm {
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
 .chat-reading-indicator__dots > span {
   display: inline-block;
   width: 6px;
