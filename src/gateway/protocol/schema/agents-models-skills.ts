@@ -173,6 +173,38 @@ export const ModelsListResultSchema = Type.Object(
   { additionalProperties: false },
 );
 
+export const ModelsProbeParamsSchema = Type.Object(
+  {
+    provider: NonEmptyString,
+    modelId: Type.Optional(Type.String()),
+    timeoutMs: Type.Optional(Type.Integer({ minimum: 0 })),
+  },
+  { additionalProperties: false },
+);
+
+export const ModelsProbeStatusSchema = Type.Union([
+  Type.Literal("ok"),
+  Type.Literal("auth"),
+  Type.Literal("rate_limit"),
+  Type.Literal("billing"),
+  Type.Literal("timeout"),
+  Type.Literal("format"),
+  Type.Literal("unknown"),
+  Type.Literal("no_model"),
+]);
+
+export const ModelsProbeResultSchema = Type.Object(
+  {
+    provider: NonEmptyString,
+    model: Type.Optional(NonEmptyString),
+    status: ModelsProbeStatusSchema,
+    latencyMs: Type.Optional(Type.Integer({ minimum: 0 })),
+    error: Type.Optional(Type.String()),
+    ts: Type.Integer({ minimum: 0 }),
+  },
+  { additionalProperties: false },
+);
+
 export const SkillsStatusParamsSchema = Type.Object(
   {
     agentId: Type.Optional(NonEmptyString),
