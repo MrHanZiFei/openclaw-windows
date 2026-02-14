@@ -51,26 +51,6 @@ export function buildInboundUserContextPrefix(ctx: TemplateContext): string {
   const chatType = normalizeChatType(ctx.ChatType);
   const isDirect = !chatType || chatType === "direct";
 
-  const conversationInfo = {
-    conversation_label: safeTrim(ctx.ConversationLabel),
-    group_subject: safeTrim(ctx.GroupSubject),
-    group_channel: safeTrim(ctx.GroupChannel),
-    group_space: safeTrim(ctx.GroupSpace),
-    thread_label: safeTrim(ctx.ThreadLabel),
-    is_forum: ctx.IsForum === true ? true : undefined,
-    was_mentioned: ctx.WasMentioned === true ? true : undefined,
-  };
-  if (Object.values(conversationInfo).some((v) => v !== undefined)) {
-    blocks.push(
-      [
-        "Conversation info (untrusted metadata):",
-        "```json",
-        JSON.stringify(conversationInfo, null, 2),
-        "```",
-      ].join("\n"),
-    );
-  }
-
   const senderInfo = isDirect
     ? undefined
     : {
