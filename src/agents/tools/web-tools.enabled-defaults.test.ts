@@ -71,6 +71,23 @@ describe("web_search country and language parameters", () => {
     expect(url.searchParams.get("search_lang")).toBe("de");
   });
 
+  it("normalizes zh search_lang to zh-hans for Brave API", async () => {
+    const mockFetch = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ web: { results: [] } }),
+      } as Response),
+    );
+    // @ts-expect-error mock fetch
+    global.fetch = mockFetch;
+
+    const tool = createWebSearchTool({ config: undefined, sandboxed: true });
+    await tool?.execute?.(1, { query: "test", search_lang: "zh" });
+
+    const url = new URL(mockFetch.mock.calls[0][0] as string);
+    expect(url.searchParams.get("search_lang")).toBe("zh-hans");
+  });
+
   it("should pass ui_lang parameter to Brave API", async () => {
     const mockFetch = vi.fn(() =>
       Promise.resolve({

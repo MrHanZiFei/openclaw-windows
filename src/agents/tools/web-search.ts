@@ -36,6 +36,56 @@ const SEARCH_CACHE = new Map<string, CacheEntry<Record<string, unknown>>>();
 const BRAVE_FRESHNESS_SHORTCUTS = new Set(["pd", "pw", "pm", "py"]);
 const BRAVE_FRESHNESS_RANGE = /^(\d{4}-\d{2}-\d{2})to(\d{4}-\d{2}-\d{2})$/;
 
+function normalizeBraveLangParam(input: string | undefined): string | undefined {
+  const trimmed = input?.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+
+  // Brave expects a specific enum for search_lang/ui_lang. Many callers provide
+  // IETF language tags like "zh-CN" or "de-DE" which Brave rejects. Normalize
+  // common tags to Brave's expected values.
+  const normalized = trimmed.toLowerCase().replaceAll("_", "-");
+
+  if (normalized === "zh") {
+    return "zh-hans";
+  }
+  if (normalized === "ja") {
+    return "jp";
+  }
+
+  const [primary, sub] = normalized.split("-", 2);
+
+  if (primary === "zh") {
+    // Default to simplified Chinese unless explicitly hinting traditional.
+    if (sub === "hant" || sub === "tw" || sub === "hk" || sub === "mo") {
+      return "zh-hant";
+    }
+    if (sub === "hans" || sub === "cn" || sub === "sg" || sub === "my") {
+      return "zh-hans";
+    }
+    return "zh-hans";
+  }
+
+  if (primary === "en") {
+    return sub === "gb" ? "en-gb" : "en";
+  }
+
+  if (primary === "pt") {
+    if (sub === "br") {
+      return "pt-br";
+    }
+    if (sub === "pt") {
+      return "pt-pt";
+    }
+    // Brave doesn't accept plain "pt"; fall back to the safer "pt-pt".
+    return "pt-pt";
+  }
+
+  // For most language tags (e.g. de-DE), Brave expects only the primary subtag (e.g. de).
+  return primary ?? normalized;
+}
+
 const WebSearchSchema = Type.Object({
   query: Type.String({ description: "Search query string." }),
   count: Type.Optional(
@@ -608,10 +658,10 @@ async function runWebSearch(params: {
     url.searchParams.set("country", params.country);
   }
   if (params.search_lang) {
-    url.searchParams.set("search_lang", params.search_lang);
+    url.searchParams.set("search_lang", normalizeBraveLangParam(params.search_lang) ?? params.search_lang);
   }
   if (params.ui_lang) {
-    url.searchParams.set("ui_lang", params.ui_lang);
+    url.searchParams.set("ui_lang", normalizeBraveLangParam(params.ui_lang) ?? params.ui_lang);
   }
   if (params.freshness) {
     url.searchParams.set("freshness", params.freshness);
