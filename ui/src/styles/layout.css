@@ -648,6 +648,11 @@
     grid-template-columns: 1fr;
   }
 
+  .table--config .table-head,
+  .table--config .table-row {
+    grid-template-columns: 1fr;
+  }
+
   .list-item {
     grid-template-columns: 1fr;
   }

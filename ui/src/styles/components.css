@@ -207,6 +207,18 @@
   color: var(--danger);
 }
 
+.pill.ok {
+  border-color: rgba(34, 197, 94, 0.35);
+  background: var(--ok-subtle);
+  color: var(--ok);
+}
+
+.pill.warn {
+  border-color: rgba(245, 158, 11, 0.4);
+  background: var(--warn-subtle);
+  color: var(--warn);
+}
+
 /* ===========================================
    Theme Toggle
    =========================================== */
@@ -923,6 +935,59 @@
 .table {
   display: grid;
   gap: 6px;
+}
+
+.table--config .table-head,
+.table--config .table-row {
+  grid-template-columns:
+    minmax(160px, 1.1fr)
+    minmax(160px, 0.7fr)
+    minmax(420px, 2.2fr)
+    minmax(320px, 1.6fr)
+    90px
+    minmax(120px, 0.7fr);
+}
+
+.config-table-baseurl {
+  width: 100%;
+  resize: vertical;
+  min-height: 42px;
+  line-height: 1.3;
+}
+
+.config-table-keyline {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.config-table-provider {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.config-table-apikey {
+  width: 100%;
+  resize: vertical;
+  min-height: 42px;
+  line-height: 1.3;
+}
+
+.config-table-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.config-table-probe-error {
+  margin-top: 6px;
+  word-break: break-word;
 }
 
 .table-head,

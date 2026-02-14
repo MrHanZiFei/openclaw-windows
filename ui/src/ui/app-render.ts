@@ -77,6 +77,7 @@ import { renderAgents } from "./views/agents.ts";
 import { renderChannels } from "./views/channels.ts";
 import { renderChat } from "./views/chat.ts";
 import { renderConfig } from "./views/config.ts";
+import { renderConfigTable } from "./views/config-table.ts";
 import { renderCron } from "./views/cron.ts";
 import { renderDebug } from "./views/debug.ts";
 import { renderExecApprovalPrompt } from "./views/exec-approval.ts";
@@ -1252,6 +1253,28 @@ export function renderApp(state: AppViewState) {
                 onSave: () => saveConfig(state),
                 onApply: () => applyConfig(state),
                 onUpdate: () => runUpdate(state),
+              })
+            : nothing
+        }
+
+        ${
+          state.tab === "configTable"
+            ? renderConfigTable({
+                locale,
+                connected: state.connected,
+                loading: state.configLoading,
+                saving: state.configSaving,
+                applying: state.configApplying,
+                dirty: state.configFormDirty,
+                formValue: state.configForm,
+                probeByProvider: state.modelsProbeByProvider,
+                probeBusyByProvider: state.modelsProbeBusyByProvider,
+                onFormPatch: (path, value) => updateConfigFormValue(state, path, value),
+                onFormRemove: (path) => removeConfigFormValue(state, path),
+                onReload: () => loadConfig(state),
+                onSave: () => saveConfig(state),
+                onApply: () => applyConfig(state),
+                onProbeProvider: (providerId) => state.handleModelsProbe(providerId),
               })
             : nothing
         }

@@ -37,6 +37,7 @@ describe("iconForTab", () => {
     expect(iconForTab("skills")).toBe("zap");
     expect(iconForTab("nodes")).toBe("monitor");
     expect(iconForTab("config")).toBe("settings");
+    expect(iconForTab("configTable")).toBe("settings");
     expect(iconForTab("debug")).toBe("bug");
     expect(iconForTab("logs")).toBe("scrollText");
   });
@@ -66,6 +67,7 @@ describe("titleForTab", () => {
   it("supports Chinese titles", () => {
     expect(titleForTabWithLocale("chat", "zh-CN")).toBe("对话");
     expect(titleForTabWithLocale("config", "zh-CN")).toBe("配置");
+    expect(titleForTabWithLocale("configTable", "zh-CN")).toBe("配置表");
   });
 });
 
@@ -80,11 +82,13 @@ describe("subtitleForTab", () => {
   it("returns descriptive subtitles", () => {
     expect(subtitleForTab("chat")).toContain("chat session");
     expect(subtitleForTab("config")).toContain("openclaw.json");
+    expect(subtitleForTab("configTable")).toContain("models.providers");
   });
 
   it("supports Chinese subtitles", () => {
     expect(subtitleForTabWithLocale("chat", "zh-CN")).toContain("网关直接对话");
     expect(subtitleForTabWithLocale("config", "zh-CN")).toContain("openclaw.json");
+    expect(subtitleForTabWithLocale("configTable", "zh-CN")).toContain("models.providers");
   });
 });
 

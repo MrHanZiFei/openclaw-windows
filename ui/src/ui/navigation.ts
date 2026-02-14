@@ -8,7 +8,7 @@ export const TAB_GROUPS = [
     tabs: ["overview", "channels", "instances", "sessions", "usage", "cron"],
   },
   { label: "Agent", tabs: ["agents", "skills", "nodes"] },
-  { label: "Settings", tabs: ["config", "debug", "logs"] },
+  { label: "Settings", tabs: ["config", "configTable", "debug", "logs"] },
 ] as const;
 
 export type Tab =
@@ -23,6 +23,7 @@ export type Tab =
   | "nodes"
   | "chat"
   | "config"
+  | "configTable"
   | "debug"
   | "logs";
 
@@ -38,6 +39,7 @@ const TAB_PATHS: Record<Tab, string> = {
   nodes: "/nodes",
   chat: "/chat",
   config: "/config",
+  configTable: "/config-table",
   debug: "/debug",
   logs: "/logs",
 };
@@ -147,6 +149,8 @@ export function iconForTab(tab: Tab): IconName {
       return "monitor";
     case "config":
       return "settings";
+    case "configTable":
+      return "settings";
     case "debug":
       return "bug";
     case "logs":
@@ -184,6 +188,8 @@ export function titleForTabWithLocale(tab: Tab, locale: UiLocale) {
       return pickLocaleText(locale, "Chat", "对话");
     case "config":
       return pickLocaleText(locale, "Config", "配置");
+    case "configTable":
+      return pickLocaleText(locale, "Config (Table)", "配置表");
     case "debug":
       return pickLocaleText(locale, "Debug", "调试");
     case "logs":
@@ -256,6 +262,12 @@ export function subtitleForTabWithLocale(tab: Tab, locale: UiLocale) {
         locale,
         "Edit ~/.openclaw/openclaw.json safely.",
         "安全编辑 ~/.openclaw/openclaw.json。",
+      );
+    case "configTable":
+      return pickLocaleText(
+        locale,
+        "Edit models.providers in a table (baseUrl/api/apiKey) and apply globally.",
+        "用表格编辑 models.providers（baseUrl/api/apiKey），并全局应用生效。",
       );
     case "debug":
       return pickLocaleText(
