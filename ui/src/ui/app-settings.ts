@@ -106,10 +106,8 @@ export function applySettingsFromUrl(host: SettingsHost) {
   }
 
   if (passwordRaw != null) {
-    const password = passwordRaw.trim();
-    if (password) {
-      (host as { password: string }).password = password;
-    }
+    // Security: never import gateway passwords from URL params, but do strip them
+    // so they don't linger in history / screen recordings.
     params.delete("password");
     hashParams.delete("password");
     shouldCleanUrl = true;
