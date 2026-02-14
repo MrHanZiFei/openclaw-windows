@@ -122,6 +122,20 @@ export function renderApp(state: AppViewState) {
   const chatAvatarUrl = state.chatAvatarUrl ?? assistantAvatarUrl ?? null;
   const configValue =
     state.configForm ?? (state.configSnapshot?.config as Record<string, unknown> | null);
+  const workspace = (() => {
+    const root = configValue && typeof configValue === "object" ? configValue : null;
+    const agents = root ? root.agents : undefined;
+    const defaults =
+      agents && typeof agents === "object" && !Array.isArray(agents)
+        ? (agents as Record<string, unknown>).defaults
+        : undefined;
+    const raw =
+      defaults && typeof defaults === "object" && !Array.isArray(defaults)
+        ? (defaults as Record<string, unknown>).workspace
+        : undefined;
+    return typeof raw === "string" ? raw : "";
+  })();
+  const workspaceLoading = state.configLoading || !state.configSnapshot?.hash;
   const basePath = normalizeBasePath(state.basePath ?? "");
   const resolvedAgentId =
     state.agentsSelectedId ??
@@ -254,6 +268,11 @@ export function renderApp(state: AppViewState) {
                 settings: state.settings,
                 password: state.password,
                 lastError: state.lastError,
+                workspace,
+                workspaceLoading,
+                workspaceDirty: state.configFormDirty,
+                workspaceSaving: state.configSaving,
+                workspaceApplying: state.configApplying,
                 presenceCount,
                 sessionsCount,
                 cronEnabled: state.cronStatus?.enabled ?? null,
@@ -272,6 +291,16 @@ export function renderApp(state: AppViewState) {
                   });
                   void state.loadAssistantIdentity();
                 },
+                onWorkspaceChange: (next) => {
+                  const trimmed = next.trim();
+                  if (!trimmed) {
+                    removeConfigFormValue(state, ["agents", "defaults", "workspace"]);
+                    return;
+                  }
+                  updateConfigFormValue(state, ["agents", "defaults", "workspace"], next);
+                },
+                onWorkspaceSave: () => void saveConfig(state),
+                onWorkspaceApply: () => void applyConfig(state),
                 onConnect: () => state.connect(),
                 onRefresh: () => state.loadOverview(),
               })

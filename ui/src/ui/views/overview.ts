@@ -12,6 +12,11 @@ export type OverviewProps = {
   settings: UiSettings;
   password: string;
   lastError: string | null;
+  workspace: string;
+  workspaceLoading: boolean;
+  workspaceDirty: boolean;
+  workspaceSaving: boolean;
+  workspaceApplying: boolean;
   presenceCount: number;
   sessionsCount: number | null;
   cronEnabled: boolean | null;
@@ -20,6 +25,9 @@ export type OverviewProps = {
   onSettingsChange: (next: UiSettings) => void;
   onPasswordChange: (next: string) => void;
   onSessionKeyChange: (next: string) => void;
+  onWorkspaceChange: (next: string) => void;
+  onWorkspaceSave: () => void;
+  onWorkspaceApply: () => void;
   onConnect: () => void;
   onRefresh: () => void;
 };
@@ -250,6 +258,66 @@ export function renderOverview(props: OverviewProps) {
               `
         }
       </div>
+    </section>
+
+    <section class="card" style="margin-top: 18px;">
+      <div class="card-title">${t("Workspace", "工作空间")}</div>
+      <div class="card-sub">
+        ${t(
+          "Default agent workspace directory (config: agents.defaults.workspace).",
+          "默认 agent 工作空间目录（配置：agents.defaults.workspace）。",
+        )}
+      </div>
+      <div class="form-grid" style="margin-top: 16px;">
+        <label class="field">
+          <span>${t("Workspace Path", "工作空间路径")}</span>
+          <input
+            .value=${props.workspace}
+            ?disabled=${!props.connected || props.workspaceLoading}
+            @input=${(e: Event) => props.onWorkspaceChange((e.target as HTMLInputElement).value)}
+            placeholder="~/openclaw"
+          />
+        </label>
+      </div>
+      <div class="row" style="margin-top: 14px;">
+        <button
+          class="btn"
+          ?disabled=${!props.connected || props.workspaceLoading || props.workspaceSaving}
+          @click=${() => props.onWorkspaceSave()}
+          title=${t("Save config (no restart).", "保存配置（不重启）。")}
+        >
+          ${props.workspaceSaving ? t("Saving...", "保存中...") : t("Save", "保存")}
+        </button>
+        <button
+          class="btn"
+          ?disabled=${!props.connected || props.workspaceLoading || props.workspaceApplying}
+          @click=${() => props.onWorkspaceApply()}
+          title=${t("Apply config (gateway will restart).", "应用配置（网关将重启）。")}
+        >
+          ${
+            props.workspaceApplying
+              ? t("Applying...", "应用中...")
+              : t("Apply (restart)", "应用（重启）")
+          }
+        </button>
+        <span class="muted">
+          ${
+            props.workspaceDirty
+              ? t("Unsaved config changes.", "有未保存的配置变更。")
+              : t("Loaded from gateway config.", "已从网关配置加载。")
+          }
+        </span>
+      </div>
+      ${
+        !props.connected
+          ? html`<div class="muted" style="margin-top: 10px;">
+              ${t(
+                "Connect to the gateway to view and edit workspace settings.",
+                "请先连接网关，才能查看和修改工作空间配置。",
+              )}
+            </div>`
+          : ""
+      }
     </section>
 
     <section class="grid grid-cols-3" style="margin-top: 18px;">

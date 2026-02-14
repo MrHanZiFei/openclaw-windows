@@ -412,6 +412,7 @@ export async function loadOverview(host: SettingsHost) {
     loadSessions(host as unknown as OpenClawApp),
     loadCronStatus(host as unknown as OpenClawApp),
     loadDebug(host as unknown as OpenClawApp),
+    loadConfig(host as unknown as OpenClawApp),
   ]);
 }
 
