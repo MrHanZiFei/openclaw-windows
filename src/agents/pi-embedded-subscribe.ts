@@ -340,18 +340,24 @@ export function subscribeEmbeddedPiSession(params: SubscribeEmbeddedPiSessionPar
     if (!params.onToolResult || !output) {
       return;
     }
+    // Extract media directives from raw tool output before wrapping in fenced
+    // blocks, because MEDIA: lines inside fences are intentionally ignored.
+    const outputDirectives = parseReplyDirectives(output);
     const agg = formatToolAggregate(toolName, meta ? [meta] : undefined, {
       markdown: useMarkdown,
     });
-    const message = `${agg}\n${formatToolOutputBlock(output)}`;
-    const { text: cleanedText, mediaUrls } = parseReplyDirectives(message);
-    if (!cleanedText && (!mediaUrls || mediaUrls.length === 0)) {
+    const message = `${agg}\n${formatToolOutputBlock(outputDirectives.text)}`;
+    const parsedMessage = parseReplyDirectives(message);
+    const mergedMediaUrls = Array.from(
+      new Set([...(outputDirectives.mediaUrls ?? []), ...(parsedMessage.mediaUrls ?? [])]),
+    );
+    if (!parsedMessage.text && mergedMediaUrls.length === 0) {
       return;
     }
     try {
       void params.onToolResult({
-        text: cleanedText,
-        mediaUrls: mediaUrls?.length ? mediaUrls : undefined,
+        text: parsedMessage.text,
+        mediaUrls: mergedMediaUrls.length > 0 ? mergedMediaUrls : undefined,
       });
     } catch {
       // ignore tool result delivery failures

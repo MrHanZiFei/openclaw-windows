@@ -10,6 +10,7 @@ const resolveReceiveIdTypeMock = vi.hoisted(() => vi.fn());
 const loadWebMediaMock = vi.hoisted(() => vi.fn());
 
 const fileCreateMock = vi.hoisted(() => vi.fn());
+const imageCreateMock = vi.hoisted(() => vi.fn());
 const imageGetMock = vi.hoisted(() => vi.fn());
 const messageCreateMock = vi.hoisted(() => vi.fn());
 const messageResourceGetMock = vi.hoisted(() => vi.fn());
@@ -60,6 +61,7 @@ describe("sendMediaFeishu msg_type routing", () => {
           create: fileCreateMock,
         },
         image: {
+          create: imageCreateMock,
           get: imageGetMock,
         },
         message: {
@@ -75,6 +77,11 @@ describe("sendMediaFeishu msg_type routing", () => {
     fileCreateMock.mockResolvedValue({
       code: 0,
       data: { file_key: "file_key_1" },
+    });
+
+    imageCreateMock.mockResolvedValue({
+      code: 0,
+      data: { image_key: "img_key_1" },
     });
 
     messageCreateMock.mockResolvedValue({
@@ -197,6 +204,23 @@ describe("sendMediaFeishu msg_type routing", () => {
     expect(fileCreateMock).not.toHaveBeenCalled();
     expect(messageCreateMock).not.toHaveBeenCalled();
     expect(messageReplyMock).not.toHaveBeenCalled();
+  });
+
+  it("passes mediaLocalRoots when loading local media", async () => {
+    await sendMediaFeishu({
+      cfg: {} as any,
+      to: "user:ou_target",
+      mediaUrl: "D:\\openclaw_home\\screenshots\\shot.png",
+      mediaLocalRoots: ["D:\\openclaw_home\\screenshots"],
+      fileName: "shot.png",
+    });
+
+    expect(loadWebMediaMock).toHaveBeenCalledWith(
+      "D:\\openclaw_home\\screenshots\\shot.png",
+      expect.objectContaining({
+        localRoots: ["D:\\openclaw_home\\screenshots"],
+      }),
+    );
   });
 
   it("uses isolated temp paths for image downloads", async () => {

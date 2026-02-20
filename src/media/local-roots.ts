@@ -8,6 +8,7 @@ function buildMediaLocalRoots(stateDir: string): string[] {
   const resolvedStateDir = path.resolve(stateDir);
   return [
     os.tmpdir(),
+    path.join(resolvedStateDir, "screenshots"),
     path.join(resolvedStateDir, "media"),
     path.join(resolvedStateDir, "agents"),
     path.join(resolvedStateDir, "workspace"),

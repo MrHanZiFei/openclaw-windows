@@ -104,34 +104,47 @@ export function resolveFeishuAccount(params: {
   cfg: ClawdbotConfig;
   accountId?: string | null;
 }): ResolvedFeishuAccount {
-  const accountId = normalizeAccountId(params.accountId);
+  const hasExplicitAccountId = Boolean(params.accountId?.trim());
+  const normalized = normalizeAccountId(params.accountId);
   const feishuCfg = params.cfg.channels?.feishu as FeishuConfig | undefined;
-
-  // Base enabled state (top-level)
   const baseEnabled = feishuCfg?.enabled !== false;
 
-  // Merge configs
-  const merged = mergeFeishuAccountConfig(params.cfg, accountId);
-
-  // Account-level enabled state
-  const accountEnabled = merged.enabled !== false;
-  const enabled = baseEnabled && accountEnabled;
-
-  // Resolve credentials from merged config
-  const creds = resolveFeishuCredentials(merged);
-
-  return {
-    accountId,
-    enabled,
-    configured: Boolean(creds),
-    name: (merged as FeishuAccountConfig).name?.trim() || undefined,
-    appId: creds?.appId,
-    appSecret: creds?.appSecret,
-    encryptKey: creds?.encryptKey,
-    verificationToken: creds?.verificationToken,
-    domain: creds?.domain ?? "feishu",
-    config: merged,
+  const resolve = (accountId: string): ResolvedFeishuAccount => {
+    const merged = mergeFeishuAccountConfig(params.cfg, accountId);
+    const accountEnabled = merged.enabled !== false;
+    const enabled = baseEnabled && accountEnabled;
+    const creds = resolveFeishuCredentials(merged);
+    return {
+      accountId,
+      enabled,
+      configured: Boolean(creds),
+      name: (merged as FeishuAccountConfig).name?.trim() || undefined,
+      appId: creds?.appId,
+      appSecret: creds?.appSecret,
+      encryptKey: creds?.encryptKey,
+      verificationToken: creds?.verificationToken,
+      domain: creds?.domain ?? "feishu",
+      config: merged,
+    };
   };
+
+  const primary = resolve(normalized);
+  const shouldFallback = !hasExplicitAccountId || normalized === DEFAULT_ACCOUNT_ID;
+  if (!shouldFallback || primary.configured) {
+    return primary;
+  }
+
+  // If default credentials are missing, fall back to the channel's resolved
+  // default account id (for example "main" in accounts-only setups).
+  const fallbackId = resolveDefaultFeishuAccountId(params.cfg);
+  if (fallbackId === primary.accountId) {
+    return primary;
+  }
+  const fallback = resolve(fallbackId);
+  if (!fallback.configured) {
+    return primary;
+  }
+  return fallback;
 }
 
 /**
