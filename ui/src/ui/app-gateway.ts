@@ -1,11 +1,9 @@
-import type { EventLogEntry } from "./app-events.ts";
-import type { OpenClawApp } from "./app.ts";
-import type { ExecApprovalRequest } from "./controllers/exec-approval.ts";
-import type { GatewayEventFrame, GatewayHelloOk } from "./gateway.ts";
-import type { Tab } from "./navigation.ts";
-import type { UiSettings } from "./storage.ts";
-import type { AgentsListResult, PresenceEntry, HealthSnapshot, StatusSummary } from "./types.ts";
+import {
+  GATEWAY_EVENT_UPDATE_AVAILABLE,
+  type GatewayUpdateAvailableEventPayload,
+} from "../../../src/gateway/events.js";
 import { CHAT_SESSIONS_ACTIVE_MINUTES, flushChatQueueForEvent } from "./app-chat.ts";
+import type { EventLogEntry } from "./app-events.ts";
 import {
   applySettings,
   loadCron,
@@ -13,11 +11,13 @@ import {
   setLastActiveSessionKey,
 } from "./app-settings.ts";
 import { handleAgentEvent, resetToolStream, type AgentEventPayload } from "./app-tool-stream.ts";
+import type { OpenClawApp } from "./app.ts";
 import { loadAgents } from "./controllers/agents.ts";
 import { loadAssistantIdentity } from "./controllers/assistant-identity.ts";
 import { loadChatHistory } from "./controllers/chat.ts";
 import { handleChatEvent, type ChatEventPayload } from "./controllers/chat.ts";
 import { loadDevices } from "./controllers/devices.ts";
+import type { ExecApprovalRequest } from "./controllers/exec-approval.ts";
 import {
   addExecApproval,
   parseExecApprovalRequested,
@@ -26,7 +26,17 @@ import {
 } from "./controllers/exec-approval.ts";
 import { loadNodes } from "./controllers/nodes.ts";
 import { loadSessions } from "./controllers/sessions.ts";
+import type { GatewayEventFrame, GatewayHelloOk } from "./gateway.ts";
 import { GatewayBrowserClient } from "./gateway.ts";
+import type { Tab } from "./navigation.ts";
+import type { UiSettings } from "./storage.ts";
+import type {
+  AgentsListResult,
+  PresenceEntry,
+  HealthSnapshot,
+  StatusSummary,
+  UpdateAvailable,
+} from "./types.ts";
 
 const CHAT_HISTORY_REFRESH_DEBOUNCE_MS = 220;
 const AGENT_SESSION_TOKEN_MARKER = "?token=";
@@ -58,6 +68,7 @@ type GatewayHost = {
   refreshSessionsAfterChat: Set<string>;
   execApprovalQueue: ExecApprovalRequest[];
   execApprovalError: string | null;
+  updateAvailable: UpdateAvailable | null;
 };
 
 function normalizeSessionKeyForMatch(value: string | undefined): string {
@@ -188,14 +199,17 @@ export function connectGateway(host: GatewayHost) {
   host.execApprovalError = null;
   clearScheduledChatHistoryRefresh(host);
 
-  host.client?.stop();
-  host.client = new GatewayBrowserClient({
+  const previousClient = host.client;
+  const client = new GatewayBrowserClient({
     url: host.settings.gatewayUrl,
     token: host.settings.token.trim() ? host.settings.token : undefined,
     password: host.password.trim() ? host.password : undefined,
     clientName: "openclaw-control-ui",
     mode: "webchat",
     onHello: (hello) => {
+      if (host.client !== client) {
+        return;
+      }
       host.connected = true;
       host.lastError = null;
       host.hello = hello;
@@ -213,6 +227,9 @@ export function connectGateway(host: GatewayHost) {
       void refreshActiveTab(host as unknown as Parameters<typeof refreshActiveTab>[0]);
     },
     onClose: ({ code, reason }) => {
+      if (host.client !== client) {
+        return;
+      }
       host.connected = false;
       clearScheduledChatHistoryRefresh(host);
       // Code 1012 = Service Restart (expected during config saves, don't show as error)
@@ -220,12 +237,22 @@ export function connectGateway(host: GatewayHost) {
         host.lastError = `disconnected (${code}): ${reason || "no reason"}`;
       }
     },
-    onEvent: (evt) => handleGatewayEvent(host, evt),
+    onEvent: (evt) => {
+      if (host.client !== client) {
+        return;
+      }
+      handleGatewayEvent(host, evt);
+    },
     onGap: ({ expected, received }) => {
+      if (host.client !== client) {
+        return;
+      }
       host.lastError = `event gap detected (expected seq ${expected}, got ${received}); refresh recommended`;
     },
   });
-  host.client.start();
+  host.client = client;
+  previousClient?.stop();
+  client.start();
 }
 
 export function handleGatewayEvent(host: GatewayHost, evt: GatewayEventFrame) {
@@ -329,6 +356,12 @@ function handleGatewayEventUnsafe(host: GatewayHost, evt: GatewayEventFrame) {
     if (resolved) {
       host.execApprovalQueue = removeExecApproval(host.execApprovalQueue, resolved.id);
     }
+    return;
+  }
+
+  if (evt.event === GATEWAY_EVENT_UPDATE_AVAILABLE) {
+    const payload = evt.payload as GatewayUpdateAvailableEventPayload | undefined;
+    host.updateAvailable = payload?.updateAvailable ?? null;
   }
 }
 
@@ -338,6 +371,7 @@ export function applySnapshot(host: GatewayHost, hello: GatewayHelloOk) {
         presence?: PresenceEntry[];
         health?: HealthSnapshot;
         sessionDefaults?: SessionDefaultsSnapshot;
+        updateAvailable?: UpdateAvailable;
       }
     | undefined;
   if (snapshot?.presence && Array.isArray(snapshot.presence)) {
@@ -349,4 +383,5 @@ export function applySnapshot(host: GatewayHost, hello: GatewayHelloOk) {
   if (snapshot?.sessionDefaults) {
     applySessionDefaults(host, snapshot.sessionDefaults);
   }
+  host.updateAvailable = snapshot?.updateAvailable ?? null;
 }
