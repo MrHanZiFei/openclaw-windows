@@ -69,6 +69,7 @@ apps/ios/*.mobileprovision
 
 # Local untracked files
 .tmp/
+/.tmp-*
 .local/
 docs/.local/
 IDENTITY.md
