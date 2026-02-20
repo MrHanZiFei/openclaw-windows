@@ -92,6 +92,7 @@ export function createOpenClawTools(options?: {
     createBrowserTool({
       sandboxBridgeUrl: options?.sandboxBrowserBridgeUrl,
       allowHostControl: options?.allowHostBrowserControl,
+      workspaceDir: options?.workspaceDir,
     }),
     createCanvasTool(),
     createNodesTool({

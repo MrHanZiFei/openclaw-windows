@@ -23,6 +23,8 @@ import { resolveBrowserConfig } from "../../browser/config.js";
 import { DEFAULT_AI_SNAPSHOT_MAX_CHARS } from "../../browser/constants.js";
 import { loadConfig } from "../../config/config.js";
 import { saveMediaBuffer } from "../../media/store.js";
+import { moveMediaFileToWorkspaceScreenshotDir } from "../../media/workspace-screenshots.js";
+import { resolveAgentWorkspaceDir, resolveDefaultAgentId } from "../agent-scope.js";
 import { BrowserToolSchema } from "./browser-tool.schema.js";
 import { type AnyAgentTool, imageResultFromFile, jsonResult, readStringParam } from "./common.js";
 import { callGatewayTool } from "./gateway.js";
@@ -154,17 +156,33 @@ async function callBrowserProxy(params: {
   return parsed;
 }
 
-async function persistProxyFiles(files: BrowserProxyFile[] | undefined) {
+async function persistProxyFiles(files: BrowserProxyFile[] | undefined, workspaceDir?: string) {
   if (!files || files.length === 0) {
     return new Map<string, string>();
   }
+  const resolvedWorkspaceDir = workspaceDir?.trim() || resolveDefaultScreenshotWorkspaceDir();
   const mapping = new Map<string, string>();
   for (const file of files) {
     const buffer = Buffer.from(file.base64, "base64");
     const saved = await saveMediaBuffer(buffer, file.mimeType, "browser", buffer.byteLength);
+    const isImage = file.mimeType?.trim().toLowerCase().startsWith("image/") ?? false;
+    if (isImage) {
+      const relocated = await moveMediaFileToWorkspaceScreenshotDir({
+        sourcePath: saved.path,
+        workspaceDir: resolvedWorkspaceDir,
+      });
+      mapping.set(file.path, relocated.path);
+      continue;
+    }
     mapping.set(file.path, saved.path);
   }
   return mapping;
+}
+
+function resolveDefaultScreenshotWorkspaceDir(): string {
+  const cfg = loadConfig();
+  const agentId = resolveDefaultAgentId(cfg);
+  return resolveAgentWorkspaceDir(cfg, agentId);
 }
 
 function applyProxyPaths(result: unknown, mapping: Map<string, string>) {
@@ -220,6 +238,7 @@ function resolveBrowserBaseUrl(params: {
 export function createBrowserTool(opts?: {
   sandboxBridgeUrl?: string;
   allowHostControl?: boolean;
+  workspaceDir?: string;
 }): AnyAgentTool {
   const targetDefault = opts?.sandboxBridgeUrl ? "sandbox" : "host";
   const hostHint =
@@ -272,7 +291,7 @@ export function createBrowserTool(opts?: {
           });
 
       const proxyRequest = nodeTarget
-        ? async (opts: {
+        ? async (proxyOpts: {
             method: string;
             path: string;
             query?: Record<string, string | number | boolean | undefined>;
@@ -282,14 +301,14 @@ export function createBrowserTool(opts?: {
           }) => {
             const proxy = await callBrowserProxy({
               nodeId: nodeTarget.nodeId,
-              method: opts.method,
-              path: opts.path,
-              query: opts.query,
-              body: opts.body,
-              timeoutMs: opts.timeoutMs,
-              profile: opts.profile,
+              method: proxyOpts.method,
+              path: proxyOpts.path,
+              query: proxyOpts.query,
+              body: proxyOpts.body,
+              timeoutMs: proxyOpts.timeoutMs,
+              profile: proxyOpts.profile,
             });
-            const mapping = await persistProxyFiles(proxy.files);
+            const mapping = await persistProxyFiles(proxy.files, opts?.workspaceDir);
             applyProxyPaths(proxy.result, mapping);
             return proxy.result;
           }

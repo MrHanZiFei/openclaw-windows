@@ -1,7 +1,10 @@
 import path from "node:path";
 import type { BrowserRouteContext } from "../server-context.js";
 import type { BrowserRouteRegistrar } from "./types.js";
+import { resolveAgentWorkspaceDir, resolveDefaultAgentId } from "../../agents/agent-scope.js";
+import { loadConfig } from "../../config/config.js";
 import { ensureMediaDir, saveMediaBuffer } from "../../media/store.js";
+import { moveMediaFileToWorkspaceScreenshotDir } from "../../media/workspace-screenshots.js";
 import { captureScreenshot, snapshotAria } from "../cdp.js";
 import {
   DEFAULT_AI_SNAPSHOT_EFFICIENT_DEPTH,
@@ -21,6 +24,12 @@ import {
   resolveProfileContext,
 } from "./agent.shared.js";
 import { jsonError, toBoolean, toNumber, toStringOrEmpty } from "./utils.js";
+
+function resolveScreenshotWorkspaceDir(): string {
+  const cfg = loadConfig();
+  const agentId = resolveDefaultAgentId(cfg);
+  return resolveAgentWorkspaceDir(cfg, agentId);
+}
 
 export function registerBrowserAgentSnapshotRoutes(
   app: BrowserRouteRegistrar,
@@ -144,9 +153,13 @@ export function registerBrowserAgentSnapshotRoutes(
         "browser",
         DEFAULT_BROWSER_SCREENSHOT_MAX_BYTES,
       );
+      const relocated = await moveMediaFileToWorkspaceScreenshotDir({
+        sourcePath: saved.path,
+        workspaceDir: resolveScreenshotWorkspaceDir(),
+      });
       res.json({
         ok: true,
-        path: path.resolve(saved.path),
+        path: path.resolve(relocated.path),
         targetId: tab.targetId,
         url: tab.url,
       });
@@ -269,6 +282,10 @@ export function registerBrowserAgentSnapshotRoutes(
             "browser",
             DEFAULT_BROWSER_SCREENSHOT_MAX_BYTES,
           );
+          const relocated = await moveMediaFileToWorkspaceScreenshotDir({
+            sourcePath: saved.path,
+            workspaceDir: resolveScreenshotWorkspaceDir(),
+          });
           const imageType = normalized.contentType?.includes("jpeg") ? "jpeg" : "png";
           return res.json({
             ok: true,
@@ -278,7 +295,7 @@ export function registerBrowserAgentSnapshotRoutes(
             labels: true,
             labelsCount: labeled.labels,
             labelsSkipped: labeled.skipped,
-            imagePath: path.resolve(saved.path),
+            imagePath: path.resolve(relocated.path),
             imageType,
             ...snap,
           });
