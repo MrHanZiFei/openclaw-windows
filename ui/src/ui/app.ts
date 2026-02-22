@@ -76,7 +76,7 @@ import {
   type ToolStreamEntry,
   type CompactionStatus,
 } from "./app-tool-stream.ts";
-import { resolveInjectedAssistantIdentity } from "./assistant-identity.ts";
+import { normalizeAssistantIdentity } from "./assistant-identity.ts";
 import { loadAssistantIdentity as loadAssistantIdentityInternal } from "./controllers/assistant-identity.ts";
 import { probeModelProvider } from "./controllers/models.ts";
 import { loadSettings, type UiSettings } from "./storage.ts";
@@ -88,7 +88,7 @@ declare global {
   }
 }
 
-const injectedAssistantIdentity = resolveInjectedAssistantIdentity();
+const injectedAssistantIdentity = normalizeAssistantIdentity();
 
 function resolveOnboardingMode(): boolean {
   if (!window.location.search) {

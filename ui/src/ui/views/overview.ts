@@ -39,8 +39,22 @@ export function renderOverview(props: OverviewProps) {
   const snapshot = props.hello?.snapshot as
     | { uptimeMs?: number; policy?: { tickIntervalMs?: number } }
     | undefined;
-  const uptime = snapshot?.uptimeMs ? formatDurationHuman(snapshot.uptimeMs) : naLabel;
-  const tick = snapshot?.policy?.tickIntervalMs ? `${snapshot.policy.tickIntervalMs}ms` : naLabel;
+  const uptimeMs = snapshot?.uptimeMs;
+  const uptime =
+    typeof uptimeMs === "number" && Number.isFinite(uptimeMs)
+      ? formatDurationHuman(uptimeMs)
+      : naLabel;
+  const tickIntervalMs =
+    (typeof props.hello?.policy?.tickIntervalMs === "number"
+      ? props.hello.policy.tickIntervalMs
+      : undefined) ??
+    (typeof snapshot?.policy?.tickIntervalMs === "number"
+      ? snapshot.policy.tickIntervalMs
+      : undefined);
+  const tick =
+    typeof tickIntervalMs === "number" && Number.isFinite(tickIntervalMs)
+      ? `${tickIntervalMs}ms`
+      : naLabel;
   const authHint = (() => {
     if (props.connected || !props.lastError) {
       return null;

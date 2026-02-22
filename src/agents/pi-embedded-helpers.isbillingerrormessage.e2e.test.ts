@@ -348,6 +348,13 @@ describe("classifyFailoverReason", () => {
       "rate_limit",
     );
   });
+  it("classifies request ramp-up throttling messages as rate_limit", () => {
+    expect(
+      classifyFailoverReason(
+        "Request rate increased too quickly. To ensure system stability, please adjust your client logic to scale requests more smoothly over time.",
+      ),
+    ).toBe("rate_limit");
+  });
   it("classifies provider high-demand / service-unavailable messages as rate_limit", () => {
     expect(
       classifyFailoverReason(
