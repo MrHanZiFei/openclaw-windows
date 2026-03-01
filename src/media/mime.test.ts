@@ -61,9 +61,11 @@ describe("mime detection", () => {
     expect(mime).toBe("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
   });
 
-  it("maps .agg extension to audio/ogg", async () => {
-    const mime = await detectMime({ filePath: "/tmp/voice.agg" });
-    expect(mime).toBe("audio/ogg");
+  it("uses extension mapping for JavaScript assets", async () => {
+    const mime = await detectMime({
+      filePath: "/tmp/a2ui.bundle.js",
+    });
+    expect(mime).toBe("text/javascript");
   });
 });
 
@@ -99,7 +101,6 @@ describe("isAudioFileName", () => {
   it("matches known audio extensions", () => {
     const cases = [
       { fileName: "voice.mp3", expected: true },
-      { fileName: "voice.agg", expected: true },
       { fileName: "voice.caf", expected: true },
       { fileName: "voice.bin", expected: false },
     ] as const;

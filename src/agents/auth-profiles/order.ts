@@ -37,7 +37,7 @@ export function resolveAuthProfileOrder(params: {
     return [];
   }
 
-  const filtered = baseOrder.filter((profileId) => {
+  const isValidProfile = (profileId: string): boolean => {
     const cred = store.profiles[profileId];
     if (!cred) {
       return false;
@@ -78,7 +78,18 @@ export function resolveAuthProfileOrder(params: {
       return Boolean(cred.access?.trim() || cred.refresh?.trim());
     }
     return false;
-  });
+  };
+  let filtered = baseOrder.filter(isValidProfile);
+
+  // Repair config/store profile-id drift from older onboarding flows:
+  // if configured profile ids no longer exist in auth-profiles.json, scan the
+  // provider's stored credentials and use any valid entries.
+  const allBaseProfilesMissing = baseOrder.every((profileId) => !store.profiles[profileId]);
+  if (filtered.length === 0 && explicitProfiles.length > 0 && allBaseProfilesMissing) {
+    const storeProfiles = listProfilesForProvider(store, providerKey);
+    filtered = storeProfiles.filter(isValidProfile);
+  }
+
   const deduped = dedupeProfileIds(filtered);
 
   // If user specified explicit order (store override or config), respect it
@@ -91,13 +102,9 @@ export function resolveAuthProfileOrder(params: {
     const inCooldown: Array<{ profileId: string; cooldownUntil: number }> = [];
 
     for (const profileId of deduped) {
-      const cooldownUntil = resolveProfileUnusableUntil(store.usageStats?.[profileId] ?? {}) ?? 0;
-      if (
-        typeof cooldownUntil === "number" &&
-        Number.isFinite(cooldownUntil) &&
-        cooldownUntil > 0 &&
-        now < cooldownUntil
-      ) {
+      if (isProfileInCooldown(store, profileId)) {
+        const cooldownUntil =
+          resolveProfileUnusableUntil(store.usageStats?.[profileId] ?? {}) ?? now;
         inCooldown.push({ profileId, cooldownUntil });
       } else {
         available.push(profileId);
