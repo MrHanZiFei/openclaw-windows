@@ -259,7 +259,13 @@ export function extractMessagingToolSend(
     if (action !== "send" && action !== "thread-reply") {
       return undefined;
     }
-    const toRaw = typeof args.to === "string" ? args.to : undefined;
+    const firstTarget =
+      Array.isArray(args.targets) &&
+      args.targets.find((value) => typeof value === "string" && value.trim().length > 0);
+    const toRaw =
+      (typeof args.to === "string" ? args.to.trim() : "") ||
+      (typeof args.target === "string" ? args.target.trim() : "") ||
+      (typeof firstTarget === "string" ? firstTarget.trim() : "");
     if (!toRaw) {
       return undefined;
     }

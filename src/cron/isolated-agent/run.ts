@@ -661,6 +661,26 @@ export async function runCronIsolatedAgentTurn(params: {
         }
       }
     } else if (synthesizedText) {
+      const deliverCronTextDirectly = async (): Promise<boolean> => {
+        const payloadsForDirectDelivery =
+          deliveryPayloads.length > 0 ? deliveryPayloads : [{ text: synthesizedText }];
+        if (payloadsForDirectDelivery.length === 0) {
+          return false;
+        }
+        const deliveryResults = await deliverOutboundPayloads({
+          cfg: cfgWithAgentDefaults,
+          channel: resolvedDelivery.channel,
+          to: resolvedDelivery.to,
+          accountId: resolvedDelivery.accountId,
+          threadId: resolvedDelivery.threadId,
+          payloads: payloadsForDirectDelivery,
+          agentId,
+          identity,
+          bestEffort: deliveryBestEffort,
+          deps: createOutboundSendDeps(params.deps),
+        });
+        return deliveryResults.length > 0;
+      };
       const announceMainSessionKey = resolveAgentMainSessionKey({
         cfg: params.cfg,
         agentId,
@@ -752,8 +772,25 @@ export async function runCronIsolatedAgentTurn(params: {
         if (didAnnounce) {
           delivered = true;
         } else {
-          const message = "cron announce delivery failed";
-          if (!deliveryBestEffort) {
+          let fallbackDelivered = false;
+          try {
+            fallbackDelivered = await deliverCronTextDirectly();
+          } catch (err) {
+            if (!deliveryBestEffort) {
+              return withRunSession({
+                status: "error",
+                summary,
+                outputText,
+                error: String(err),
+                ...telemetry,
+              });
+            }
+            logWarn(`[cron:${params.job.id}] ${String(err)}`);
+          }
+          if (fallbackDelivered) {
+            delivered = true;
+          } else if (!deliveryBestEffort) {
+            const message = "cron announce delivery failed";
             return withRunSession({
               status: "error",
               summary,
@@ -761,11 +798,29 @@ export async function runCronIsolatedAgentTurn(params: {
               error: message,
               ...telemetry,
             });
+          } else {
+            logWarn(`[cron:${params.job.id}] cron announce delivery failed`);
           }
-          logWarn(`[cron:${params.job.id}] ${message}`);
         }
       } catch (err) {
-        if (!deliveryBestEffort) {
+        let fallbackDelivered = false;
+        try {
+          fallbackDelivered = await deliverCronTextDirectly();
+        } catch (fallbackErr) {
+          if (!deliveryBestEffort) {
+            return withRunSession({
+              status: "error",
+              summary,
+              outputText,
+              error: String(fallbackErr),
+              ...telemetry,
+            });
+          }
+          logWarn(`[cron:${params.job.id}] ${String(fallbackErr)}`);
+        }
+        if (fallbackDelivered) {
+          delivered = true;
+        } else if (!deliveryBestEffort) {
           return withRunSession({
             status: "error",
             summary,
@@ -773,8 +828,9 @@ export async function runCronIsolatedAgentTurn(params: {
             error: String(err),
             ...telemetry,
           });
+        } else {
+          logWarn(`[cron:${params.job.id}] ${String(err)}`);
         }
-        logWarn(`[cron:${params.job.id}] ${String(err)}`);
       }
     }
   }

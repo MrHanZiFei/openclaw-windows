@@ -247,6 +247,32 @@ describe("runCronIsolatedAgentTurn", () => {
     });
   });
 
+  it("falls back to direct outbound text delivery when announce does not deliver", async () => {
+    await withTempCronHome(async (home) => {
+      const storePath = await writeSessionStore(home, { lastProvider: "webchat", lastTo: "" });
+      const deps = createCliDeps({
+        sendMessageTelegram: vi.fn().mockResolvedValue({
+          messageId: "t1",
+          chatId: "123",
+        }),
+      });
+      mockAgentPayloads([{ text: "hello from cron" }]);
+      vi.mocked(runSubagentAnnounceFlow).mockResolvedValueOnce(false);
+
+      const res = await runTelegramAnnounceTurn({
+        home,
+        storePath,
+        deps,
+        delivery: { mode: "announce", channel: "telegram", to: "123" },
+      });
+
+      expect(res.status).toBe("ok");
+      expect(res.delivered).toBe(true);
+      expect(runSubagentAnnounceFlow).toHaveBeenCalledTimes(1);
+      expect(deps.sendMessageTelegram).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it("reports not-delivered when best-effort structured outbound sends all fail", async () => {
     await expectBestEffortTelegramNotDelivered({
       text: "caption",

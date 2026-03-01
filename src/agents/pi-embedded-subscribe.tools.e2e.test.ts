@@ -35,4 +35,28 @@ describe("extractMessagingToolSend", () => {
     expect(result?.provider).toBe("slack");
     expect(result?.to).toBe("channel:C1");
   });
+
+  it("extracts target when to is absent", () => {
+    const result = extractMessagingToolSend("message", {
+      action: "send",
+      channel: "telegram",
+      target: "123",
+    });
+
+    expect(result?.tool).toBe("message");
+    expect(result?.provider).toBe("telegram");
+    expect(result?.to).toBe("telegram:123");
+  });
+
+  it("extracts first non-empty targets entry when to/target are absent", () => {
+    const result = extractMessagingToolSend("message", {
+      action: "send",
+      channel: "telegram",
+      targets: ["", "123", "456"],
+    });
+
+    expect(result?.tool).toBe("message");
+    expect(result?.provider).toBe("telegram");
+    expect(result?.to).toBe("telegram:123");
+  });
 });
