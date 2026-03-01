@@ -1,20 +1,53 @@
 import { html } from "lit";
 import { repeat } from "lit/directives/repeat.js";
+import { t } from "../i18n/index.ts";
+import { refreshChat } from "./app-chat.ts";
+import { syncUrlWithSessionKey } from "./app-settings.ts";
 import type { AppViewState } from "./app-view-state.ts";
+import { OpenClawApp } from "./app.ts";
+import { ChatState, loadChatHistory } from "./controllers/chat.ts";
+import { icons } from "./icons.ts";
+import { iconForTab, pathForTab, titleForTab, type Tab } from "./navigation.ts";
 import type { ThemeTransitionContext } from "./theme-transition.ts";
 import type { ThemeMode } from "./theme.ts";
 import type { SessionsListResult } from "./types.ts";
-import { refreshChat } from "./app-chat.ts";
-import { syncUrlWithSessionKey } from "./app-settings.ts";
-import { OpenClawApp } from "./app.ts";
-import { ChatState, loadChatHistory } from "./controllers/chat.ts";
-import { pickLocaleText } from "./i18n.ts";
-import { icons } from "./icons.ts";
-import { iconForTab, pathForTab, titleForTabWithLocale, type Tab } from "./navigation.ts";
+
+type SessionDefaultsSnapshot = {
+  mainSessionKey?: string;
+  mainKey?: string;
+};
+
+function resolveSidebarChatSessionKey(state: AppViewState): string {
+  const snapshot = state.hello?.snapshot as
+    | { sessionDefaults?: SessionDefaultsSnapshot }
+    | undefined;
+  const mainSessionKey = snapshot?.sessionDefaults?.mainSessionKey?.trim();
+  if (mainSessionKey) {
+    return mainSessionKey;
+  }
+  const mainKey = snapshot?.sessionDefaults?.mainKey?.trim();
+  if (mainKey) {
+    return mainKey;
+  }
+  return "main";
+}
+
+function resetChatStateForSessionSwitch(state: AppViewState, sessionKey: string) {
+  state.sessionKey = sessionKey;
+  state.chatMessage = "";
+  state.chatStream = null;
+  (state as unknown as OpenClawApp).chatStreamStartedAt = null;
+  state.chatRunId = null;
+  (state as unknown as OpenClawApp).resetToolStream();
+  (state as unknown as OpenClawApp).resetChatScroll();
+  state.applySettings({
+    ...state.settings,
+    sessionKey,
+    lastActiveSessionKey: sessionKey,
+  });
+}
 
 export function renderTab(state: AppViewState, tab: Tab) {
-  const locale = state.settings.locale;
-  const title = titleForTabWithLocale(tab, locale);
   const href = pathForTab(tab, state.basePath);
   return html`
     <a
@@ -32,18 +65,24 @@ export function renderTab(state: AppViewState, tab: Tab) {
           return;
         }
         event.preventDefault();
+        if (tab === "chat") {
+          const mainSessionKey = resolveSidebarChatSessionKey(state);
+          if (state.sessionKey !== mainSessionKey) {
+            resetChatStateForSessionSwitch(state, mainSessionKey);
+            void state.loadAssistantIdentity();
+          }
+        }
         state.setTab(tab);
       }}
-      title=${title}
+      title=${titleForTab(tab)}
     >
       <span class="nav-item__icon" aria-hidden="true">${icons[iconForTab(tab)]}</span>
-      <span class="nav-item__text">${title}</span>
+      <span class="nav-item__text">${titleForTab(tab)}</span>
     </a>
   `;
 }
 
 export function renderChatControls(state: AppViewState) {
-  const locale = state.settings.locale;
   const mainSessionKey = resolveMainSessionKey(state.hello, state.sessionsResult);
   const sessionOptions = resolveSessionOptions(
     state.sessionKey,
@@ -121,7 +160,7 @@ export function renderChatControls(state: AppViewState) {
             sessionOptions,
             (entry) => entry.key,
             (entry) =>
-              html`<option value=${entry.key}>
+              html`<option value=${entry.key} title=${entry.key}>
                 ${entry.displayName ?? entry.key}
               </option>`,
           )}
@@ -148,7 +187,7 @@ export function renderChatControls(state: AppViewState) {
             });
           }
         }}
-        title=${pickLocaleText(locale, "Refresh chat data", "刷新对话数据")}
+        title=${t("chat.refreshTitle")}
       >
         ${refreshIcon}
       </button>
@@ -166,15 +205,7 @@ export function renderChatControls(state: AppViewState) {
           });
         }}
         aria-pressed=${showThinking}
-        title=${
-          disableThinkingToggle
-            ? pickLocaleText(locale, "Disabled during onboarding", "引导流程期间已禁用")
-            : pickLocaleText(
-                locale,
-                "Toggle assistant thinking/working output",
-                "切换显示助手思考/执行内容",
-              )
-        }
+        title=${disableThinkingToggle ? t("chat.onboardingDisabled") : t("chat.thinkingToggle")}
       >
         ${icons.brain}
       </button>
@@ -191,26 +222,13 @@ export function renderChatControls(state: AppViewState) {
           });
         }}
         aria-pressed=${focusActive}
-        title=${
-          disableFocusToggle
-            ? pickLocaleText(locale, "Disabled during onboarding", "引导流程期间已禁用")
-            : pickLocaleText(
-                locale,
-                "Toggle focus mode (hide sidebar + page header)",
-                "切换专注模式（隐藏侧边栏和页面头）",
-              )
-        }
+        title=${disableFocusToggle ? t("chat.onboardingDisabled") : t("chat.focusToggle")}
       >
         ${focusIcon}
       </button>
     </div>
   `;
 }
-
-type SessionDefaultsSnapshot = {
-  mainSessionKey?: string;
-  mainKey?: string;
-};
 
 function resolveMainSessionKey(
   hello: AppViewState["hello"],
@@ -231,19 +249,104 @@ function resolveMainSessionKey(
   return null;
 }
 
+/* ── Channel display labels ────────────────────────────── */
+const CHANNEL_LABELS: Record<string, string> = {
+  bluebubbles: "iMessage",
+  telegram: "Telegram",
+  discord: "Discord",
+  signal: "Signal",
+  slack: "Slack",
+  whatsapp: "WhatsApp",
+  matrix: "Matrix",
+  email: "Email",
+  sms: "SMS",
+};
+
+const KNOWN_CHANNEL_KEYS = Object.keys(CHANNEL_LABELS);
+
+/** Parsed type / context extracted from a session key. */
+export type SessionKeyInfo = {
+  /** Prefix for typed sessions (Subagent:/Cron:). Empty for others. */
+  prefix: string;
+  /** Human-readable fallback when no label / displayName is available. */
+  fallbackName: string;
+};
+
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/**
+ * Parse a session key to extract type information and a human-readable
+ * fallback display name.  Exported for testing.
+ */
+export function parseSessionKey(key: string): SessionKeyInfo {
+  // ── Main session ─────────────────────────────────
+  if (key === "main" || key === "agent:main:main") {
+    return { prefix: "", fallbackName: "Main Session" };
+  }
+
+  // ── Subagent ─────────────────────────────────────
+  if (key.includes(":subagent:")) {
+    return { prefix: "Subagent:", fallbackName: "Subagent:" };
+  }
+
+  // ── Cron job ─────────────────────────────────────
+  if (key.includes(":cron:")) {
+    return { prefix: "Cron:", fallbackName: "Cron Job:" };
+  }
+
+  // ── Direct chat  (agent:<x>:<channel>:direct:<id>) ──
+  const directMatch = key.match(/^agent:[^:]+:([^:]+):direct:(.+)$/);
+  if (directMatch) {
+    const channel = directMatch[1];
+    const identifier = directMatch[2];
+    const channelLabel = CHANNEL_LABELS[channel] ?? capitalize(channel);
+    return { prefix: "", fallbackName: `${channelLabel} · ${identifier}` };
+  }
+
+  // ── Group chat  (agent:<x>:<channel>:group:<id>) ────
+  const groupMatch = key.match(/^agent:[^:]+:([^:]+):group:(.+)$/);
+  if (groupMatch) {
+    const channel = groupMatch[1];
+    const channelLabel = CHANNEL_LABELS[channel] ?? capitalize(channel);
+    return { prefix: "", fallbackName: `${channelLabel} Group` };
+  }
+
+  // ── Channel-prefixed legacy keys (e.g. "bluebubbles:g-…") ──
+  for (const ch of KNOWN_CHANNEL_KEYS) {
+    if (key === ch || key.startsWith(`${ch}:`)) {
+      return { prefix: "", fallbackName: `${CHANNEL_LABELS[ch]} Session` };
+    }
+  }
+
+  // ── Unknown — return key as-is ───────────────────
+  return { prefix: "", fallbackName: key };
+}
+
 export function resolveSessionDisplayName(
   key: string,
   row?: SessionsListResult["sessions"][number],
-) {
-  const displayName = row?.displayName?.trim() || "";
+): string {
   const label = row?.label?.trim() || "";
-  if (displayName && displayName !== key) {
-    return `${displayName} (${key})`;
-  }
+  const displayName = row?.displayName?.trim() || "";
+  const { prefix, fallbackName } = parseSessionKey(key);
+
+  const applyTypedPrefix = (name: string): string => {
+    if (!prefix) {
+      return name;
+    }
+    const prefixPattern = new RegExp(`^${prefix.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}\\s*`, "i");
+    return prefixPattern.test(name) ? name : `${prefix} ${name}`;
+  };
+
   if (label && label !== key) {
-    return `${label} (${key})`;
+    return applyTypedPrefix(label);
   }
-  return key;
+  if (displayName && displayName !== key) {
+    return applyTypedPrefix(displayName);
+  }
+  return fallbackName;
 }
 
 function resolveSessionOptions(
@@ -294,7 +397,6 @@ function resolveSessionOptions(
 const THEME_ORDER: ThemeMode[] = ["system", "light", "dark"];
 
 export function renderThemeToggle(state: AppViewState) {
-  const locale = state.settings.locale;
   const index = Math.max(0, THEME_ORDER.indexOf(state.theme));
   const applyTheme = (next: ThemeMode) => (event: MouseEvent) => {
     const element = event.currentTarget as HTMLElement;
@@ -308,18 +410,14 @@ export function renderThemeToggle(state: AppViewState) {
 
   return html`
     <div class="theme-toggle" style="--theme-index: ${index};">
-      <div
-        class="theme-toggle__track"
-        role="group"
-        aria-label=${pickLocaleText(locale, "Theme", "主题")}
-      >
+      <div class="theme-toggle__track" role="group" aria-label="Theme">
         <span class="theme-toggle__indicator"></span>
         <button
           class="theme-toggle__button ${state.theme === "system" ? "active" : ""}"
           @click=${applyTheme("system")}
           aria-pressed=${state.theme === "system"}
-          aria-label=${pickLocaleText(locale, "System theme", "跟随系统主题")}
-          title=${pickLocaleText(locale, "System", "系统")}
+          aria-label="System theme"
+          title="System"
         >
           ${renderMonitorIcon()}
         </button>
@@ -327,8 +425,8 @@ export function renderThemeToggle(state: AppViewState) {
           class="theme-toggle__button ${state.theme === "light" ? "active" : ""}"
           @click=${applyTheme("light")}
           aria-pressed=${state.theme === "light"}
-          aria-label=${pickLocaleText(locale, "Light theme", "浅色主题")}
-          title=${pickLocaleText(locale, "Light", "浅色")}
+          aria-label="Light theme"
+          title="Light"
         >
           ${renderSunIcon()}
         </button>
@@ -336,8 +434,8 @@ export function renderThemeToggle(state: AppViewState) {
           class="theme-toggle__button ${state.theme === "dark" ? "active" : ""}"
           @click=${applyTheme("dark")}
           aria-pressed=${state.theme === "dark"}
-          aria-label=${pickLocaleText(locale, "Dark theme", "深色主题")}
-          title=${pickLocaleText(locale, "Dark", "深色")}
+          aria-label="Dark theme"
+          title="Dark"
         >
           ${renderMoonIcon()}
         </button>
