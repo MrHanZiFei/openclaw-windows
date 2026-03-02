@@ -1,90 +1,90 @@
-import type { ClawdbotConfig } from "openclaw/plugin-sdk";
 import { describe, expect, it } from "vitest";
-import { resolveFeishuAccount } from "./accounts.js";
+import { resolveDefaultFeishuAccountId, resolveFeishuAccount } from "./accounts.js";
+
+describe("resolveDefaultFeishuAccountId", () => {
+  it("prefers channels.feishu.defaultAccount when configured", () => {
+    const cfg = {
+      channels: {
+        feishu: {
+          defaultAccount: "router-d",
+          accounts: {
+            default: { appId: "cli_default", appSecret: "secret_default" },
+            "router-d": { appId: "cli_router", appSecret: "secret_router" },
+          },
+        },
+      },
+    };
+
+    expect(resolveDefaultFeishuAccountId(cfg as never)).toBe("router-d");
+  });
+
+  it("normalizes configured defaultAccount before lookup", () => {
+    const cfg = {
+      channels: {
+        feishu: {
+          defaultAccount: "Router D",
+          accounts: {
+            "router-d": { appId: "cli_router", appSecret: "secret_router" },
+          },
+        },
+      },
+    };
+
+    expect(resolveDefaultFeishuAccountId(cfg as never)).toBe("router-d");
+  });
+
+  it("falls back to literal default account id when preferred is missing", () => {
+    const cfg = {
+      channels: {
+        feishu: {
+          defaultAccount: "missing",
+          accounts: {
+            default: { appId: "cli_default", appSecret: "secret_default" },
+            zeta: { appId: "cli_zeta", appSecret: "secret_zeta" },
+          },
+        },
+      },
+    };
+
+    expect(resolveDefaultFeishuAccountId(cfg as never)).toBe("default");
+  });
+});
 
 describe("resolveFeishuAccount", () => {
-  it("falls back to configured default account when accountId is omitted", () => {
+  it("uses configured default account when accountId is omitted", () => {
     const cfg = {
       channels: {
         feishu: {
+          defaultAccount: "router-d",
           accounts: {
-            main: {
-              appId: "cli_main",
-              appSecret: "secret_main",
-            },
+            default: { enabled: true },
+            "router-d": { appId: "cli_router", appSecret: "secret_router", enabled: true },
           },
         },
       },
-    } as ClawdbotConfig;
+    };
 
-    const account = resolveFeishuAccount({ cfg });
-
-    expect(account.accountId).toBe("main");
+    const account = resolveFeishuAccount({ cfg: cfg as never, accountId: undefined });
+    expect(account.accountId).toBe("router-d");
     expect(account.configured).toBe(true);
-    expect(account.appId).toBe("cli_main");
+    expect(account.appId).toBe("cli_router");
   });
 
-  it("falls back to configured default account when accountId is explicitly default", () => {
+  it("keeps explicit accountId selection", () => {
     const cfg = {
       channels: {
         feishu: {
+          defaultAccount: "router-d",
           accounts: {
-            main: {
-              appId: "cli_main",
-              appSecret: "secret_main",
-            },
+            default: { appId: "cli_default", appSecret: "secret_default" },
+            "router-d": { appId: "cli_router", appSecret: "secret_router" },
           },
         },
       },
-    } as ClawdbotConfig;
+    };
 
-    const account = resolveFeishuAccount({ cfg, accountId: "default" });
-
-    expect(account.accountId).toBe("main");
-    expect(account.configured).toBe(true);
-    expect(account.appId).toBe("cli_main");
-  });
-
-  it("keeps explicit non-default account ids without fallback", () => {
-    const cfg = {
-      channels: {
-        feishu: {
-          accounts: {
-            main: {
-              appId: "cli_main",
-              appSecret: "secret_main",
-            },
-          },
-        },
-      },
-    } as ClawdbotConfig;
-
-    const account = resolveFeishuAccount({ cfg, accountId: "unknown" });
-
-    expect(account.accountId).toBe("unknown");
-    expect(account.configured).toBe(false);
-  });
-
-  it("keeps default account when top-level credentials are configured", () => {
-    const cfg = {
-      channels: {
-        feishu: {
-          appId: "cli_default",
-          appSecret: "secret_default",
-          accounts: {
-            main: {
-              appId: "cli_main",
-              appSecret: "secret_main",
-            },
-          },
-        },
-      },
-    } as ClawdbotConfig;
-
-    const account = resolveFeishuAccount({ cfg, accountId: "default" });
-
+    const account = resolveFeishuAccount({ cfg: cfg as never, accountId: "default" });
     expect(account.accountId).toBe("default");
-    expect(account.configured).toBe(true);
     expect(account.appId).toBe("cli_default");
   });
 });
