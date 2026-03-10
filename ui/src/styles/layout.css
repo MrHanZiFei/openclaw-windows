@@ -190,39 +190,6 @@
   height: 12px;
 }
 
-.locale-picker {
-  display: inline-flex;
-  align-items: center;
-}
-
-.locale-picker select {
-  height: 32px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  background: var(--secondary);
-  color: var(--text);
-  font-size: 12px;
-  padding: 0 28px 0 10px;
-  outline: none;
-}
-
-.locale-picker select:focus {
-  border-color: var(--ring);
-  box-shadow: var(--focus-ring);
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
 /* ===========================================
    Navigation Sidebar
    =========================================== */
@@ -645,11 +612,6 @@
 
   .table-head,
   .table-row {
-    grid-template-columns: 1fr;
-  }
-
-  .table--config .table-head,
-  .table--config .table-row {
     grid-template-columns: 1fr;
   }
 

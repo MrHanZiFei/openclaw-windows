@@ -1,5 +1,3 @@
-import type { OpenClawApp } from "./app.ts";
-import type { AgentsListResult } from "./types.ts";
 import { refreshChat } from "./app-chat.ts";
 import {
   startLogsPolling,
@@ -8,6 +6,7 @@ import {
   stopDebugPolling,
 } from "./app-polling.ts";
 import { scheduleChatScroll, scheduleLogsScroll } from "./app-scroll.ts";
+import type { OpenClawApp } from "./app.ts";
 import { loadAgentIdentities, loadAgentIdentity } from "./controllers/agent-identity.ts";
 import { loadAgentSkills } from "./controllers/agent-skills.ts";
 import { loadAgents, loadToolsCatalog } from "./controllers/agents.ts";
@@ -38,6 +37,7 @@ import {
 import { saveSettings, type UiSettings } from "./storage.ts";
 import { startThemeTransition, type ThemeTransitionContext } from "./theme-transition.ts";
 import { resolveTheme, type ResolvedTheme, type ThemeMode } from "./theme.ts";
+import type { AgentsListResult } from "./types.ts";
 
 type SettingsHost = {
   settings: UiSettings;
@@ -120,8 +120,7 @@ export function applySettingsFromUrl(host: SettingsHost) {
   }
 
   if (passwordRaw != null) {
-    // Security: never import gateway passwords from URL params, but do strip them
-    // so they don't linger in history / screen recordings.
+    // Never hydrate password from URL params; strip only.
     params.delete("password");
     hashParams.delete("password");
     shouldCleanUrl = true;
@@ -238,11 +237,6 @@ export async function refreshActiveTab(host: SettingsHost) {
   }
   if (host.tab === "config") {
     await loadConfigSchema(host as unknown as OpenClawApp);
-    await loadConfig(host as unknown as OpenClawApp);
-  }
-  if (host.tab === "configTable") {
-    // This view patches config via configForm; ensure apply/save serialize from the form.
-    (host as unknown as OpenClawApp).configFormMode = "form";
     await loadConfig(host as unknown as OpenClawApp);
   }
   if (host.tab === "debug") {
@@ -431,7 +425,6 @@ export async function loadOverview(host: SettingsHost) {
     loadSessions(host as unknown as OpenClawApp),
     loadCronStatus(host as unknown as OpenClawApp),
     loadDebug(host as unknown as OpenClawApp),
-    loadConfig(host as unknown as OpenClawApp),
   ]);
 }
 

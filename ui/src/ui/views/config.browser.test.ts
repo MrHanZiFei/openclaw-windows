@@ -4,7 +4,6 @@ import { renderConfig } from "./config.ts";
 
 describe("config view", () => {
   const baseProps = () => ({
-    locale: "en" as const,
     raw: "{\n}\n",
     originalRaw: "{\n}\n",
     valid: true,

@@ -994,9 +994,9 @@ export function renderApp(state: AppViewState) {
                 error: state.lastError,
                 sessions: state.sessionsResult,
                 focusMode: chatFocus,
-                onRefresh: async () => {
+                onRefresh: () => {
                   state.resetToolStream();
-                  await Promise.all([loadChatHistory(state), refreshChatAvatar(state)]);
+                  return Promise.all([loadChatHistory(state), refreshChatAvatar(state)]);
                 },
                 onToggleFocusMode: () => {
                   if (state.onboarding) {

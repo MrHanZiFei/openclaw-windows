@@ -258,8 +258,8 @@ export function renderOverview(props: OverviewProps) {
             <select
               .value=${currentLocale}
               @change=${(e: Event) => {
-                const v = (e.target as HTMLSelectElement).value as UiSettings["locale"];
-                void i18n.setLocale(v as Locale);
+                const v = (e.target as HTMLSelectElement).value as Locale;
+                void i18n.setLocale(v);
                 props.onSettingsChange({ ...props.settings, locale: v });
               }}
             >

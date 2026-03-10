@@ -5,7 +5,6 @@ registerAppMountHooks();
 
 describe("chat focus mode", () => {
   it("collapses header + sidebar on chat tab only", async () => {
-    localStorage.setItem("openclaw.control.settings.v1", JSON.stringify({ locale: "en" }));
     const app = mountApp("/chat");
     await app.updateComplete;
 

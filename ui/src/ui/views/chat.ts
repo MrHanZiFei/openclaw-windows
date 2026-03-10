@@ -70,7 +70,7 @@ export type ChatProps = {
   showNewMessages?: boolean;
   onScrollToBottom?: () => void;
   // Event handlers
-  onRefresh: () => void | Promise<void>;
+  onRefresh: () => void;
   onToggleFocusMode: () => void;
   onDraftChange: (next: string) => void;
   onSend: () => void;
@@ -288,12 +288,7 @@ export function renderChat(props: ChatProps) {
           }
 
           if (item.kind === "reading-indicator") {
-            return renderReadingIndicatorGroup({
-              assistant: assistantIdentity,
-              startedAt: item.startedAt,
-              onRefresh: props.onRefresh,
-              onAbort: canAbort ? props.onAbort : undefined,
-            });
+            return renderReadingIndicatorGroup(assistantIdentity);
           }
 
           if (item.kind === "stream") {
@@ -603,16 +598,15 @@ function buildChatItems(props: ChatProps): Array<ChatItem | MessageGroup> {
 
   if (props.stream !== null) {
     const key = `stream:${props.sessionKey}:${props.streamStartedAt ?? "live"}`;
-    const startedAt = props.streamStartedAt ?? Date.now();
     if (props.stream.trim().length > 0) {
       items.push({
         kind: "stream",
         key,
         text: props.stream,
-        startedAt,
+        startedAt: props.streamStartedAt ?? Date.now(),
       });
     } else {
-      items.push({ kind: "reading-indicator", key, startedAt });
+      items.push({ kind: "reading-indicator", key });
     }
   }
 

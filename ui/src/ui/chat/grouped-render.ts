@@ -56,20 +56,7 @@ function extractImages(message: unknown): ImageBlock[] {
   return images;
 }
 
-export function renderReadingIndicatorGroup(opts?: {
-  assistant?: AssistantIdentity;
-  startedAt?: number;
-  onRefresh?: () => void;
-  onAbort?: () => void;
-}) {
-  const startedAt = typeof opts?.startedAt === "number" ? opts.startedAt : null;
-  const since = startedAt
-    ? new Date(startedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
-    : null;
-  const assistant = opts?.assistant;
-  const onRefresh = opts?.onRefresh;
-  const onAbort = opts?.onAbort;
-
+export function renderReadingIndicatorGroup(assistant?: AssistantIdentity) {
   return html`
     <div class="chat-group assistant">
       ${renderAvatar("assistant", assistant)}
@@ -78,37 +65,6 @@ export function renderReadingIndicatorGroup(opts?: {
           <span class="chat-reading-indicator__dots">
             <span></span><span></span><span></span>
           </span>
-        </div>
-        <div class="chat-reading-indicator__meta">
-          <span class="chat-reading-indicator__text">
-            ${since ? `Working… (since ${since})` : "Working…"}
-          </span>
-          ${
-            onRefresh || onAbort
-              ? html`
-                <span class="chat-reading-indicator__actions">
-                  ${
-                    onRefresh
-                      ? html`
-                        <button class="btn btn--sm" type="button" @click=${onRefresh}>
-                          Refresh
-                        </button>
-                      `
-                      : nothing
-                  }
-                  ${
-                    onAbort
-                      ? html`
-                        <button class="btn btn--sm danger" type="button" @click=${onAbort}>
-                          Stop
-                        </button>
-                      `
-                      : nothing
-                  }
-                </span>
-              `
-              : nothing
-          }
         </div>
       </div>
     </div>

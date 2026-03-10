@@ -13,7 +13,6 @@ const createHost = (tab: Tab): SettingsHost => ({
     token: "",
     sessionKey: "main",
     lastActiveSessionKey: "main",
-    locale: "en",
     theme: "system",
     chatFocusMode: false,
     chatShowThinking: true,

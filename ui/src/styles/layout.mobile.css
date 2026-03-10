@@ -94,12 +94,6 @@
     display: none;
   }
 
-  .locale-picker select {
-    height: 28px;
-    font-size: 11px;
-    padding: 0 24px 0 8px;
-  }
-
   /* Nav */
   .nav {
     padding: 8px 10px;
@@ -365,12 +359,6 @@
   .topbar-status .pill {
     padding: 3px 6px;
     font-size: 10px;
-  }
-
-  .locale-picker select {
-    height: 24px;
-    font-size: 10px;
-    padding: 0 20px 0 7px;
   }
 
   .theme-toggle {
