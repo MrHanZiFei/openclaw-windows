@@ -236,18 +236,6 @@
   color: var(--danger);
 }
 
-.pill.ok {
-  border-color: rgba(34, 197, 94, 0.35);
-  background: var(--ok-subtle);
-  color: var(--ok);
-}
-
-.pill.warn {
-  border-color: rgba(245, 158, 11, 0.4);
-  background: var(--warn-subtle);
-  color: var(--warn);
-}
-
 /* ===========================================
    Theme Toggle
    =========================================== */
@@ -1441,78 +1429,6 @@
   gap: 6px;
 }
 
-.config-table-scroll {
-  max-width: 100%;
-  overflow-x: auto;
-  overflow-y: visible;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-gutter: stable;
-}
-
-.config-table-scroll .table--config {
-  min-width: max(100%, 1380px);
-}
-
-.table--config .table-head,
-.table--config .table-row {
-  grid-template-columns:
-    minmax(140px, 1fr)
-    minmax(180px, 1fr)
-    minmax(320px, 2fr)
-    minmax(260px, 1.5fr)
-    minmax(160px, 1fr)
-    minmax(300px, 1.4fr);
-}
-
-.table--config .table-row {
-  align-items: start;
-}
-
-.table--config .table-head > div,
-.table--config .table-row > div {
-  min-width: 0;
-}
-
-.table--config .cfg-select,
-.table--config .cfg-input,
-.table--config .cfg-textarea {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-}
-
-.config-table-baseurl {
-  width: 100%;
-  resize: vertical;
-  min-height: 42px;
-  line-height: 1.3;
-}
-
-.config-table-provider {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-  min-width: 0;
-}
-
-.config-table-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  justify-content: flex-start;
-  flex-wrap: wrap;
-}
-
-.config-table-actions .btn {
-  flex: 0 0 auto;
-}
-
-.config-table-probe-error {
-  margin-top: 6px;
-  word-break: break-word;
-}
-
 .table-head,
 .table-row {
   display: grid;
@@ -1898,27 +1814,6 @@
   align-items: center;
   gap: 4px;
   height: 12px;
-}
-
-.chat-reading-indicator__meta {
-  margin-top: 6px;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.chat-reading-indicator__actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.chat-reading-indicator__actions .btn.btn--sm {
-  padding: 4px 8px;
-  font-size: 11px;
 }
 
 .chat-reading-indicator__dots > span {
