@@ -1,7 +1,10 @@
 import { Type } from "@sinclair/typebox";
+import { isRestartEnabled } from "../../config/commands.js";
 import type { OpenClawConfig } from "../../config/config.js";
-import { loadConfig, resolveConfigSnapshotHash } from "../../config/io.js";
-import { loadSessionStore, resolveStorePath } from "../../config/sessions.js";
+import { parseConfigJson5, resolveConfigSnapshotHash } from "../../config/io.js";
+import { applyLegacyMigrations } from "../../config/legacy.js";
+import { applyMergePatch } from "../../config/merge-patch.js";
+import { extractDeliveryInfo } from "../../config/sessions.js";
 import {
   formatDoctorNonInteractiveHint,
   type RestartSentinelPayload,
@@ -11,11 +14,12 @@ import { scheduleGatewaySigusr1Restart } from "../../infra/restart.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { stringEnum } from "../schema/typebox.js";
 import { type AnyAgentTool, jsonResult, readStringParam } from "./common.js";
-import { callGatewayTool } from "./gateway.js";
+import { callGatewayTool, readGatewayCallOptions } from "./gateway.js";
 
 const log = createSubsystemLogger("gateway-tool");
 
 const DEFAULT_UPDATE_TIMEOUT_MS = 20 * 60_000;
+const PROTECTED_GATEWAY_CONFIG_PATHS = ["tools.exec.ask", "tools.exec.security"] as const;
 
 function resolveBaseHashFromSnapshot(snapshot: unknown): string | undefined {
   if (!snapshot || typeof snapshot !== "object") {
@@ -30,16 +34,78 @@ function resolveBaseHashFromSnapshot(snapshot: unknown): string | undefined {
   return hash ?? undefined;
 }
 
+function getSnapshotConfig(snapshot: unknown): Record<string, unknown> {
+  if (!snapshot || typeof snapshot !== "object") {
+    throw new Error("config.get response is not an object.");
+  }
+  const config = (snapshot as { config?: unknown }).config;
+  if (!config || typeof config !== "object" || Array.isArray(config)) {
+    throw new Error("config.get response is missing a config object.");
+  }
+  return config as Record<string, unknown>;
+}
+
+function parseGatewayConfigMutationRaw(
+  raw: string,
+  action: "config.apply" | "config.patch",
+): unknown {
+  const parsedRes = parseConfigJson5(raw);
+  if (!parsedRes.ok) {
+    throw new Error(parsedRes.error);
+  }
+  if (
+    !parsedRes.parsed ||
+    typeof parsedRes.parsed !== "object" ||
+    Array.isArray(parsedRes.parsed)
+  ) {
+    throw new Error(`${action} raw must be an object.`);
+  }
+  return parsedRes.parsed;
+}
+
+function getValueAtPath(config: Record<string, unknown>, path: string): unknown {
+  let current: unknown = config;
+  for (const part of path.split(".")) {
+    if (!current || typeof current !== "object" || Array.isArray(current)) {
+      return undefined;
+    }
+    current = (current as Record<string, unknown>)[part];
+  }
+  return current;
+}
+
+function assertGatewayConfigMutationAllowed(params: {
+  action: "config.apply" | "config.patch";
+  currentConfig: Record<string, unknown>;
+  raw: string;
+}): void {
+  const parsed = parseGatewayConfigMutationRaw(params.raw, params.action);
+  const nextConfig =
+    params.action === "config.apply"
+      ? (parsed as Record<string, unknown>)
+      : (applyMergePatch(params.currentConfig, parsed, {
+          mergeObjectArraysById: true,
+        }) as Record<string, unknown>);
+  const migratedNextConfig = applyLegacyMigrations(nextConfig).next ?? nextConfig;
+  const changedProtectedPaths = PROTECTED_GATEWAY_CONFIG_PATHS.filter(
+    (path) =>
+      getValueAtPath(params.currentConfig, path) !== getValueAtPath(migratedNextConfig, path),
+  );
+  if (changedProtectedPaths.length === 0) {
+    return;
+  }
+  throw new Error(
+    `gateway ${params.action} cannot change protected config paths: ${changedProtectedPaths.join(", ")}`,
+  );
+}
+
 const GATEWAY_ACTIONS = [
   "restart",
   "config.get",
-  "config.schema",
+  "config.schema.lookup",
   "config.apply",
   "config.patch",
   "update.run",
-  "usage.status",
-  "usage.cost",
-  "usage.sessions",
 ] as const;
 
 // NOTE: Using a flattened object schema instead of Type.Union([Type.Object(...), ...])
@@ -50,10 +116,12 @@ const GatewayToolSchema = Type.Object({
   // restart
   delayMs: Type.Optional(Type.Number()),
   reason: Type.Optional(Type.String()),
-  // config.get, config.schema, config.apply, update.run
+  // config.get, config.schema.lookup, config.apply, update.run
   gatewayUrl: Type.Optional(Type.String()),
   gatewayToken: Type.Optional(Type.String()),
   timeoutMs: Type.Optional(Type.Number()),
+  // config.schema.lookup
+  path: Type.Optional(Type.String()),
   // config.apply, config.patch
   raw: Type.Optional(Type.String()),
   baseHash: Type.Optional(Type.String()),
@@ -61,73 +129,11 @@ const GatewayToolSchema = Type.Object({
   sessionKey: Type.Optional(Type.String()),
   note: Type.Optional(Type.String()),
   restartDelayMs: Type.Optional(Type.Number()),
-  // usage.cost, usage.sessions
-  startDate: Type.Optional(Type.String()),
-  endDate: Type.Optional(Type.String()),
-  days: Type.Optional(Type.Number()),
-  // usage.sessions
-  key: Type.Optional(Type.String()),
-  limit: Type.Optional(Type.Number()),
-  includeContextWeight: Type.Optional(Type.Boolean()),
 });
 // NOTE: We intentionally avoid top-level `allOf`/`anyOf`/`oneOf` conditionals here:
 // - OpenAI rejects tool schemas that include these keywords at the *top-level*.
 // - Claude/Vertex has other JSON Schema quirks.
 // Conditional requirements (like `raw` for config.apply) are enforced at runtime.
-
-const ISO_DAY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
-
-function formatUtcDay(date: Date): string {
-  const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(date.getUTCDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-function normalizeIsoDay(value: unknown, fieldName: "startDate" | "endDate"): string | undefined {
-  if (typeof value !== "string") {
-    return undefined;
-  }
-  const trimmed = value.trim();
-  if (!trimmed) {
-    return undefined;
-  }
-  if (!ISO_DAY_PATTERN.test(trimmed)) {
-    throw new Error(`${fieldName} must use YYYY-MM-DD format`);
-  }
-  return trimmed;
-}
-
-function resolveUsageDateRange(params: Record<string, unknown>): {
-  startDate?: string;
-  endDate?: string;
-} {
-  const startDate = normalizeIsoDay(params.startDate, "startDate");
-  const endDate = normalizeIsoDay(params.endDate, "endDate");
-  if (startDate || endDate) {
-    return {
-      startDate: startDate ?? endDate,
-      endDate: endDate ?? startDate,
-    };
-  }
-
-  const daysRaw = params.days;
-  const days =
-    typeof daysRaw === "number" && Number.isFinite(daysRaw) ? Math.max(1, Math.floor(daysRaw)) : 0;
-  if (!days) {
-    return {};
-  }
-
-  const today = new Date();
-  const utcToday = new Date(
-    Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()),
-  );
-  const start = new Date(utcToday.getTime() - (days - 1) * 24 * 60 * 60 * 1000);
-  return {
-    startDate: formatUtcDay(start),
-    endDate: formatUtcDay(utcToday),
-  };
-}
 
 export function createGatewayTool(opts?: {
   agentSessionKey?: string;
@@ -136,15 +142,16 @@ export function createGatewayTool(opts?: {
   return {
     label: "Gateway",
     name: "gateway",
+    ownerOnly: true,
     description:
-      "Restart, update, or configure the gateway in-place (SIGUSR1), and read usage summaries. Use config.patch for safe partial config updates (merges with existing). Use config.apply only when replacing entire config. Both trigger restart after writing.",
+      "Restart, inspect a specific config schema path, apply config, or update the gateway in-place (SIGUSR1). Use config.schema.lookup with a targeted dot path before config edits. Use config.patch for safe partial config updates (merges with existing). Use config.apply only when replacing entire config. Both trigger restart after writing. Always pass a human-readable completion message via the `note` parameter so the system can deliver it to the user after restart.",
     parameters: GatewayToolSchema,
     execute: async (_toolCallId, args) => {
       const params = args as Record<string, unknown>;
       const action = readStringParam(params, "action", { required: true });
       if (action === "restart") {
-        if (opts?.config?.commands?.restart !== true) {
-          throw new Error("Gateway restart is disabled. Set commands.restart=true to enable.");
+        if (!isRestartEnabled(opts?.config)) {
+          throw new Error("Gateway restart is disabled (commands.restart=false).");
         }
         const sessionKey =
           typeof params.sessionKey === "string" && params.sessionKey.trim()
@@ -161,34 +168,8 @@ export function createGatewayTool(opts?: {
         const note =
           typeof params.note === "string" && params.note.trim() ? params.note.trim() : undefined;
         // Extract channel + threadId for routing after restart
-        let deliveryContext: { channel?: string; to?: string; accountId?: string } | undefined;
-        let threadId: string | undefined;
-        if (sessionKey) {
-          const threadMarker = ":thread:";
-          const threadIndex = sessionKey.lastIndexOf(threadMarker);
-          const baseSessionKey = threadIndex === -1 ? sessionKey : sessionKey.slice(0, threadIndex);
-          const threadIdRaw =
-            threadIndex === -1 ? undefined : sessionKey.slice(threadIndex + threadMarker.length);
-          threadId = threadIdRaw?.trim() || undefined;
-          try {
-            const cfg = loadConfig();
-            const storePath = resolveStorePath(cfg.session?.store);
-            const store = loadSessionStore(storePath);
-            let entry = store[sessionKey];
-            if (!entry?.deliveryContext && threadIndex !== -1 && baseSessionKey) {
-              entry = store[baseSessionKey];
-            }
-            if (entry?.deliveryContext) {
-              deliveryContext = {
-                channel: entry.deliveryContext.channel,
-                to: entry.deliveryContext.to,
-                accountId: entry.deliveryContext.accountId,
-              };
-            }
-          } catch {
-            // ignore: best-effort
-          }
-        }
+        // Supports both :thread: (most channels) and :topic: (Telegram)
+        const { deliveryContext, threadId } = extractDeliveryInfo(sessionKey);
         const payload: RestartSentinelPayload = {
           kind: "restart",
           status: "ok",
@@ -218,64 +199,13 @@ export function createGatewayTool(opts?: {
         return jsonResult(scheduled);
       }
 
-      const gatewayUrl =
-        typeof params.gatewayUrl === "string" && params.gatewayUrl.trim()
-          ? params.gatewayUrl.trim()
-          : undefined;
-      const gatewayToken =
-        typeof params.gatewayToken === "string" && params.gatewayToken.trim()
-          ? params.gatewayToken.trim()
-          : undefined;
-      const timeoutMs =
-        typeof params.timeoutMs === "number" && Number.isFinite(params.timeoutMs)
-          ? Math.max(1, Math.floor(params.timeoutMs))
-          : undefined;
-      const gatewayOpts = { gatewayUrl, gatewayToken, timeoutMs };
+      const gatewayOpts = readGatewayCallOptions(params);
 
-      if (action === "config.get") {
-        const result = await callGatewayTool("config.get", gatewayOpts, {});
-        return jsonResult({ ok: true, result });
-      }
-      if (action === "config.schema") {
-        const result = await callGatewayTool("config.schema", gatewayOpts, {});
-        return jsonResult({ ok: true, result });
-      }
-      if (action === "usage.status") {
-        const result = await callGatewayTool("usage.status", gatewayOpts, {});
-        return jsonResult({ ok: true, result });
-      }
-      if (action === "usage.cost") {
-        const range = resolveUsageDateRange(params);
-        const result = await callGatewayTool("usage.cost", gatewayOpts, range);
-        return jsonResult({ ok: true, result });
-      }
-      if (action === "usage.sessions") {
-        const range = resolveUsageDateRange(params);
-        const key =
-          typeof params.key === "string" && params.key.trim() ? params.key.trim() : undefined;
-        const includeContextWeight =
-          typeof params.includeContextWeight === "boolean"
-            ? params.includeContextWeight
-            : undefined;
-        const limit =
-          typeof params.limit === "number" && Number.isFinite(params.limit)
-            ? Math.max(1, Math.floor(params.limit))
-            : undefined;
-        const result = await callGatewayTool("sessions.usage", gatewayOpts, {
-          ...range,
-          ...(key ? { key } : {}),
-          ...(typeof limit === "number" ? { limit } : {}),
-          ...(typeof includeContextWeight === "boolean" ? { includeContextWeight } : {}),
-        });
-        return jsonResult({ ok: true, result });
-      }
-      if (action === "config.apply") {
-        const raw = readStringParam(params, "raw", { required: true });
-        let baseHash = readStringParam(params, "baseHash");
-        if (!baseHash) {
-          const snapshot = await callGatewayTool("config.get", gatewayOpts, {});
-          baseHash = resolveBaseHashFromSnapshot(snapshot);
-        }
+      const resolveGatewayWriteMeta = (): {
+        sessionKey: string | undefined;
+        note: string | undefined;
+        restartDelayMs: number | undefined;
+      } => {
         const sessionKey =
           typeof params.sessionKey === "string" && params.sessionKey.trim()
             ? params.sessionKey.trim()
@@ -286,6 +216,52 @@ export function createGatewayTool(opts?: {
           typeof params.restartDelayMs === "number" && Number.isFinite(params.restartDelayMs)
             ? Math.floor(params.restartDelayMs)
             : undefined;
+        return { sessionKey, note, restartDelayMs };
+      };
+
+      const resolveConfigWriteParams = async (): Promise<{
+        raw: string;
+        baseHash: string;
+        snapshotConfig: Record<string, unknown>;
+        sessionKey: string | undefined;
+        note: string | undefined;
+        restartDelayMs: number | undefined;
+      }> => {
+        const raw = readStringParam(params, "raw", { required: true });
+        const snapshot = await callGatewayTool("config.get", gatewayOpts, {});
+        // Always fetch config.get so we can compare protected exec settings
+        // against the current snapshot before forwarding any write RPC.
+        const snapshotConfig = getSnapshotConfig(snapshot);
+        let baseHash = readStringParam(params, "baseHash");
+        if (!baseHash) {
+          baseHash = resolveBaseHashFromSnapshot(snapshot);
+        }
+        if (!baseHash) {
+          throw new Error("Missing baseHash from config snapshot.");
+        }
+        return { raw, baseHash, snapshotConfig, ...resolveGatewayWriteMeta() };
+      };
+
+      if (action === "config.get") {
+        const result = await callGatewayTool("config.get", gatewayOpts, {});
+        return jsonResult({ ok: true, result });
+      }
+      if (action === "config.schema.lookup") {
+        const path = readStringParam(params, "path", {
+          required: true,
+          label: "path",
+        });
+        const result = await callGatewayTool("config.schema.lookup", gatewayOpts, { path });
+        return jsonResult({ ok: true, result });
+      }
+      if (action === "config.apply") {
+        const { raw, baseHash, snapshotConfig, sessionKey, note, restartDelayMs } =
+          await resolveConfigWriteParams();
+        assertGatewayConfigMutationAllowed({
+          action: "config.apply",
+          currentConfig: snapshotConfig,
+          raw,
+        });
         const result = await callGatewayTool("config.apply", gatewayOpts, {
           raw,
           baseHash,
@@ -296,22 +272,13 @@ export function createGatewayTool(opts?: {
         return jsonResult({ ok: true, result });
       }
       if (action === "config.patch") {
-        const raw = readStringParam(params, "raw", { required: true });
-        let baseHash = readStringParam(params, "baseHash");
-        if (!baseHash) {
-          const snapshot = await callGatewayTool("config.get", gatewayOpts, {});
-          baseHash = resolveBaseHashFromSnapshot(snapshot);
-        }
-        const sessionKey =
-          typeof params.sessionKey === "string" && params.sessionKey.trim()
-            ? params.sessionKey.trim()
-            : opts?.agentSessionKey?.trim() || undefined;
-        const note =
-          typeof params.note === "string" && params.note.trim() ? params.note.trim() : undefined;
-        const restartDelayMs =
-          typeof params.restartDelayMs === "number" && Number.isFinite(params.restartDelayMs)
-            ? Math.floor(params.restartDelayMs)
-            : undefined;
+        const { raw, baseHash, snapshotConfig, sessionKey, note, restartDelayMs } =
+          await resolveConfigWriteParams();
+        assertGatewayConfigMutationAllowed({
+          action: "config.patch",
+          currentConfig: snapshotConfig,
+          raw,
+        });
         const result = await callGatewayTool("config.patch", gatewayOpts, {
           raw,
           baseHash,
@@ -322,25 +289,17 @@ export function createGatewayTool(opts?: {
         return jsonResult({ ok: true, result });
       }
       if (action === "update.run") {
-        const sessionKey =
-          typeof params.sessionKey === "string" && params.sessionKey.trim()
-            ? params.sessionKey.trim()
-            : opts?.agentSessionKey?.trim() || undefined;
-        const note =
-          typeof params.note === "string" && params.note.trim() ? params.note.trim() : undefined;
-        const restartDelayMs =
-          typeof params.restartDelayMs === "number" && Number.isFinite(params.restartDelayMs)
-            ? Math.floor(params.restartDelayMs)
-            : undefined;
+        const { sessionKey, note, restartDelayMs } = resolveGatewayWriteMeta();
+        const updateTimeoutMs = gatewayOpts.timeoutMs ?? DEFAULT_UPDATE_TIMEOUT_MS;
         const updateGatewayOpts = {
           ...gatewayOpts,
-          timeoutMs: timeoutMs ?? DEFAULT_UPDATE_TIMEOUT_MS,
+          timeoutMs: updateTimeoutMs,
         };
         const result = await callGatewayTool("update.run", updateGatewayOpts, {
           sessionKey,
           note,
           restartDelayMs,
-          timeoutMs: timeoutMs ?? DEFAULT_UPDATE_TIMEOUT_MS,
+          timeoutMs: updateTimeoutMs,
         });
         return jsonResult({ ok: true, result });
       }
