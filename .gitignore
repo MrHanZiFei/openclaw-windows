@@ -105,6 +105,7 @@ package-lock.json
 .claude/
 .agent/
 skills-lock.json
+skills/aihirehumans-auto/
 
 # Local iOS signing overrides
 apps/ios/LocalSigning.xcconfig
